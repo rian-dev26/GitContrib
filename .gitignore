@@ -1,24 +1,35 @@
-*.log
-.DS_Store
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual Environment
+.venv/
+venv/
+env/
+ENV/
+
+# Streamlit
+.streamlit/
+
+# Git temp folders (dari proses clone sementara)
+gh_viewer_*/
+
+# Environment variables
 .env
-.env.backup
-.env.production
-.phpactor.json
-.phpunit.result.cache
+.env.*
+
+# IDE
+.idea/
+.vscode/
 /.fleet
-/.idea
 /.nova
-/.phpunit.cache
-/.vscode
 /.zed
-/auth.json
-/node_modules
-/public/build
-/public/hot
-/public/storage
-/storage/*.key
-/storage/pail
-/vendor
-Homestead.json
-Homestead.yaml
+
+# OS
+.DS_Store
 Thumbs.db
+
+# Logs
+*.log
