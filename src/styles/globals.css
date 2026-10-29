@@ -138,3 +138,31 @@
     transform: none !important;
   }
 }
+
+/* ─── Media Print Rules for Reports ────────────────────────────────────────── */
+@media print {
+  aside,
+  header,
+  nav,
+  .no-print,
+  button {
+    display: none !important;
+  }
+
+  body, html, main {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  #printable-report {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+  }
+}
