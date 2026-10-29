@@ -4,6 +4,12 @@ __pycache__/
 *.pyo
 *.pyd
 
+# Node & Frontend Build
+node_modules/
+dist/
+dist-ssr/
+*.local
+
 # Virtual Environment
 .venv/
 venv/
