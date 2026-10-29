@@ -1,0 +1,140 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Light Mode Default Variables (RGB space-separated for Tailwind alpha support) */
+  :root {
+    --color-app-bg: 246 248 250;
+    --color-app-sidebar: 255 255 255;
+    --color-app-card: 255 255 255;
+    --color-app-secondary: 238 241 244;
+    --color-app-border: 216 220 226;
+    --color-app-text-primary: 25 27 31;
+    --color-app-text-secondary: 94 100 112;
+    --color-app-accent-primary: 59 102 189;
+    --color-app-accent-primary-hover: 46 82 154;
+    --color-app-accent-secondary: 88 135 153;
+    --color-app-accent-positive: 22 163 74;
+    --color-app-accent-negative: 220 38 38;
+  }
+
+  /* Dark Mode Variables (RGB space-separated for Tailwind alpha support) */
+  html.dark,
+  .dark {
+    --color-app-bg: 17 18 20;
+    --color-app-sidebar: 23 24 27;
+    --color-app-card: 29 31 34;
+    --color-app-secondary: 38 40 44;
+    --color-app-border: 52 54 59;
+    --color-app-text-primary: 245 245 245;
+    --color-app-text-secondary: 163 166 173;
+    --color-app-accent-primary: 76 113 193;
+    --color-app-accent-primary-hover: 60 93 167;
+    --color-app-accent-secondary: 115 167 186;
+    --color-app-accent-positive: 137 225 156;
+    --color-app-accent-negative: 224 108 117;
+  }
+
+  * {
+    border-color: rgb(var(--color-app-border));
+  }
+
+  html,
+  body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    background-color: rgb(var(--color-app-bg));
+    color: rgb(var(--color-app-text-primary));
+    font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+
+  /* Custom subtle scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgb(var(--color-app-border));
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--color-app-accent-primary));
+  }
+}
+
+/* Animations for Analysis Flow */
+@keyframes aiNodePulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+}
+
+@keyframes flowDash {
+  0% {
+    stroke-dashoffset: 32;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes commitRowIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-ai-pulse {
+  animation: aiNodePulse 2.4s ease-in-out infinite;
+}
+
+.animate-flow-dash {
+  stroke-dasharray: 6 6;
+  animation: flowDash 1.2s linear infinite;
+}
+
+.animate-commit-row {
+  animation: commitRowIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Respect user's system preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .animate-ai-pulse,
+  .animate-flow-dash,
+  .animate-commit-row,
+  .animate-spin,
+  .animate-pulse,
+  .animate-bounce {
+    animation: none !important;
+    transform: none !important;
+  }
+}

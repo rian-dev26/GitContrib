@@ -1,0 +1,302 @@
+import {
+  Repository,
+  Contributor,
+  Commit,
+  AnalysisSummary,
+  AnalysisHistoryItem,
+} from '../types';
+
+/**
+ * Data prototype dummy untuk tahap setup fondasi GitContrib.
+ * Seluruh data di bawah ini adalah data simulasi (mock) untuk pengembangan UI
+ * dan BUKAN hasil evaluasi atau analisis nyata.
+ */
+
+export const MOCK_REPOSITORIES: Repository[] = [
+  {
+    id: 'repo-pbl-01',
+    name: 'smart-inventory-pbl',
+    fullName: 'if-polibatam/smart-inventory-pbl',
+    url: 'https://github.com/if-polibatam/smart-inventory-pbl',
+    defaultBranch: 'main',
+    description: 'Proyek PBL Aplikasi Manajemen Inventaris Laboratorium - IF314',
+    isPrivate: false,
+    createdAt: '2024-02-10T08:00:00Z',
+    lastAnalyzedAt: '2024-10-25T14:30:00Z',
+    stats: {
+      totalCommits: 142,
+      totalContributors: 4,
+      branchesCount: 3,
+    },
+  },
+  {
+    id: 'repo-pbl-02',
+    name: 'attendance-mobile-app',
+    fullName: 'if-polibatam/attendance-mobile-app',
+    url: 'https://github.com/if-polibatam/attendance-mobile-app',
+    defaultBranch: 'master',
+    description: 'Aplikasi Presensi Perkuliahan Berbasis Geolocation - IF314 PBL',
+    isPrivate: false,
+    createdAt: '2024-02-15T09:15:00Z',
+    lastAnalyzedAt: '2024-10-26T10:00:00Z',
+    stats: {
+      totalCommits: 98,
+      totalContributors: 5,
+      branchesCount: 2,
+    },
+  },
+  {
+    id: 'repo-pbl-03',
+    name: 'pbl-course-portal',
+    fullName: 'if-polibatam/pbl-course-portal',
+    url: 'https://github.com/if-polibatam/pbl-course-portal',
+    defaultBranch: 'main',
+    description: 'Portal Informasi dan Monitoring Proyek PBL Mahasiswa',
+    isPrivate: false,
+    createdAt: '2024-03-01T11:00:00Z',
+    lastAnalyzedAt: undefined,
+    stats: {
+      totalCommits: 64,
+      totalContributors: 3,
+      branchesCount: 1,
+    },
+  },
+];
+
+export const MOCK_CONTRIBUTORS: Contributor[] = [
+  {
+    id: 'contrib-01',
+    name: 'Dimas Pratama (Contoh)',
+    username: 'dimas-pbl',
+    email: 'dimas.contoh@polibatam.ac.id',
+    repositoryId: 'repo-pbl-01',
+    metrics: {
+      totalCommits: 52,
+      classifiedYesCount: 44,
+      classifiedNoCount: 8,
+      yesRatio: 0.846,
+      firstCommitDate: '2024-02-12T10:00:00Z',
+      lastCommitDate: '2024-10-24T18:20:00Z',
+      totalAdditions: 3420,
+      totalDeletions: 890,
+    },
+  },
+  {
+    id: 'contrib-02',
+    name: 'Siti Aisyah (Contoh)',
+    username: 'siti-aisyah',
+    email: 'siti.contoh@polibatam.ac.id',
+    repositoryId: 'repo-pbl-01',
+    metrics: {
+      totalCommits: 41,
+      classifiedYesCount: 35,
+      classifiedNoCount: 6,
+      yesRatio: 0.853,
+      firstCommitDate: '2024-02-14T11:30:00Z',
+      lastCommitDate: '2024-10-23T14:10:00Z',
+      totalAdditions: 2150,
+      totalDeletions: 430,
+    },
+  },
+  {
+    id: 'contrib-03',
+    name: 'Rian Hidayat (Contoh)',
+    username: 'rian-h',
+    email: 'rian.contoh@polibatam.ac.id',
+    repositoryId: 'repo-pbl-01',
+    metrics: {
+      totalCommits: 31,
+      classifiedYesCount: 22,
+      classifiedNoCount: 9,
+      yesRatio: 0.709,
+      firstCommitDate: '2024-02-18T09:00:00Z',
+      lastCommitDate: '2024-10-20T16:45:00Z',
+      totalAdditions: 1480,
+      totalDeletions: 620,
+    },
+  },
+  {
+    id: 'contrib-04',
+    name: 'Nurul Fadhilah (Contoh)',
+    username: 'nurul-f',
+    email: 'nurul.contoh@polibatam.ac.id',
+    repositoryId: 'repo-pbl-01',
+    metrics: {
+      totalCommits: 18,
+      classifiedYesCount: 12,
+      classifiedNoCount: 6,
+      yesRatio: 0.666,
+      firstCommitDate: '2024-02-25T13:00:00Z',
+      lastCommitDate: '2024-10-22T08:15:00Z',
+      totalAdditions: 890,
+      totalDeletions: 210,
+    },
+  },
+];
+
+export const MOCK_COMMITS: Commit[] = [
+  {
+    id: 'a1b2c3d4e5f67890123456789abcdef012345678',
+    shortSha: 'a1b2c3d',
+    repositoryId: 'repo-pbl-01',
+    contributorId: 'contrib-01',
+    contributorName: 'Dimas Pratama (Contoh)',
+    contributorEmail: 'dimas.contoh@polibatam.ac.id',
+    message: 'feat: implement barcode scanner handler for asset check-in',
+    timestamp: '2024-10-24T18:20:00Z',
+    stats: {
+      additions: 185,
+      deletions: 24,
+      totalChanges: 209,
+      filesChanged: 4,
+    },
+    files: [
+      { filename: 'src/modules/scanner/scannerService.ts', additions: 120, deletions: 10, changes: 130 },
+      { filename: 'src/modules/scanner/scannerView.tsx', additions: 55, deletions: 12, changes: 67 },
+      { filename: 'src/types/scanner.ts', additions: 10, deletions: 2, changes: 12 },
+    ],
+    classification: {
+      label: 'YES',
+      confidence: 0.94,
+      metadata: {
+        modelVersion: 'proto-v0.1-rf',
+        algorithm: 'Supervised Random Forest (Prototype)',
+        evaluatedAt: '2024-10-25T14:30:00Z',
+        featuresUsed: ['code_churn', 'file_diversity', 'message_clarity', 'diff_entropy'],
+      },
+    },
+  },
+  {
+    id: 'b2c3d4e5f6a7890123456789abcdef0123456789',
+    shortSha: 'b2c3d4e',
+    repositoryId: 'repo-pbl-01',
+    contributorId: 'contrib-02',
+    contributorName: 'Siti Aisyah (Contoh)',
+    contributorEmail: 'siti.contoh@polibatam.ac.id',
+    message: 'fix: validate serial number uniqueness before database insert',
+    timestamp: '2024-10-23T14:10:00Z',
+    stats: {
+      additions: 42,
+      deletions: 6,
+      totalChanges: 48,
+      filesChanged: 2,
+    },
+    classification: {
+      label: 'YES',
+      confidence: 0.88,
+      metadata: {
+        modelVersion: 'proto-v0.1-rf',
+        algorithm: 'Supervised Random Forest (Prototype)',
+        evaluatedAt: '2024-10-25T14:30:00Z',
+      },
+    },
+  },
+  {
+    id: 'c3d4e5f6a7b8890123456789abcdef012345678a',
+    shortSha: 'c3d4e5f',
+    repositoryId: 'repo-pbl-01',
+    contributorId: 'contrib-03',
+    contributorName: 'Rian Hidayat (Contoh)',
+    contributorEmail: 'rian.contoh@polibatam.ac.id',
+    message: 'docs: update readme with setup instructions',
+    timestamp: '2024-10-20T16:45:00Z',
+    stats: {
+      additions: 12,
+      deletions: 4,
+      totalChanges: 16,
+      filesChanged: 1,
+    },
+    classification: {
+      label: 'NO',
+      confidence: 0.72,
+      metadata: {
+        modelVersion: 'proto-v0.1-rf',
+        algorithm: 'Supervised Random Forest (Prototype)',
+        evaluatedAt: '2024-10-25T14:30:00Z',
+      },
+    },
+  },
+];
+
+export const MOCK_ANALYSIS_SUMMARY: AnalysisSummary = {
+  id: 'analysis-sum-01',
+  repositoryId: 'repo-pbl-01',
+  repositoryName: 'if-polibatam/smart-inventory-pbl',
+  branch: 'main',
+  analyzedAt: '2024-10-25T14:30:00Z',
+  totalCommitsAnalyzed: 142,
+  totalContributors: 4,
+  overallYesRatio: 0.795,
+  overallNoRatio: 0.205,
+  contributorsSummary: [
+    {
+      contributorId: 'contrib-01',
+      contributorName: 'Dimas Pratama (Contoh)',
+      username: 'dimas-pbl',
+      totalCommits: 52,
+      yesCommits: 44,
+      noCommits: 8,
+      yesPercentage: 84.6,
+    },
+    {
+      contributorId: 'contrib-02',
+      contributorName: 'Siti Aisyah (Contoh)',
+      username: 'siti-aisyah',
+      totalCommits: 41,
+      yesCommits: 35,
+      noCommits: 6,
+      yesPercentage: 85.3,
+    },
+    {
+      contributorId: 'contrib-03',
+      contributorName: 'Rian Hidayat (Contoh)',
+      username: 'rian-h',
+      totalCommits: 31,
+      yesCommits: 22,
+      noCommits: 9,
+      yesPercentage: 70.9,
+    },
+    {
+      contributorId: 'contrib-04',
+      contributorName: 'Nurul Fadhilah (Contoh)',
+      username: 'nurul-f',
+      totalCommits: 18,
+      yesCommits: 12,
+      noCommits: 6,
+      yesPercentage: 66.6,
+    },
+  ],
+  timeframe: {
+    from: '2024-02-12',
+    to: '2024-10-25',
+  },
+  notice:
+    'Hasil klasifikasi YES/NO merupakan indikasi estimasi pola kontribusi commit berbasis model prototype. Hasil ini bukan representasi tunggal dari dedikasi atau nilai akademik mahasiswa.',
+};
+
+export const MOCK_ANALYSIS_HISTORY: AnalysisHistoryItem[] = [
+  {
+    id: 'hist-01',
+    repositoryId: 'repo-pbl-01',
+    repositoryName: 'if-polibatam/smart-inventory-pbl',
+    branch: 'main',
+    status: 'COMPLETED',
+    startedAt: '2024-10-25T14:28:10Z',
+    completedAt: '2024-10-25T14:30:00Z',
+    totalCommits: 142,
+    totalContributors: 4,
+    triggeredBy: 'Dosen Pengampu IF314',
+  },
+  {
+    id: 'hist-02',
+    repositoryId: 'repo-pbl-02',
+    repositoryName: 'if-polibatam/attendance-mobile-app',
+    branch: 'master',
+    status: 'COMPLETED',
+    startedAt: '2024-10-26T09:58:00Z',
+    completedAt: '2024-10-26T10:00:00Z',
+    totalCommits: 98,
+    totalContributors: 5,
+    triggeredBy: 'Dosen Pengampu IF314',
+  },
+];

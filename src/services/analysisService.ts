@@ -1,0 +1,83 @@
+import {
+  AnalysisSummary,
+  AnalysisHistoryItem,
+  Contributor,
+  Commit,
+} from '../types';
+import {
+  MOCK_ANALYSIS_SUMMARY,
+  MOCK_ANALYSIS_HISTORY,
+  MOCK_CONTRIBUTORS,
+  MOCK_COMMITS,
+} from '../mocks';
+
+/**
+ * Analysis Service
+ * Mengelola hasil analisis pola kontribusi Machine Learning (YES/NO) untuk Dosen.
+ */
+export const analysisService = {
+  /**
+   * Mengambil ringkasan analisis untuk repository
+   */
+  async getAnalysisSummary(repositoryId: string): Promise<AnalysisSummary | null> {
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    if (repositoryId === MOCK_ANALYSIS_SUMMARY.repositoryId) {
+      return { ...MOCK_ANALYSIS_SUMMARY };
+    }
+    // Return summary default jika repo berbeda
+    return {
+      ...MOCK_ANALYSIS_SUMMARY,
+      repositoryId,
+      repositoryName: `repo/${repositoryId}`,
+    };
+  },
+
+  /**
+   * Mengambil daftar contributor beserta ringkasan metrik commit
+   */
+  async getContributors(repositoryId: string): Promise<Contributor[]> {
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    return MOCK_CONTRIBUTORS.filter((c) => c.repositoryId === repositoryId || true);
+  },
+
+  /**
+   * Mengambil detail contributor spesifik
+   */
+  async getContributorById(contributorId: string): Promise<Contributor | null> {
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    const found = MOCK_CONTRIBUTORS.find((c) => c.id === contributorId);
+    return found ? { ...found } : null;
+  },
+
+  /**
+   * Mengambil daftar commit dengan hasil klasifikasi YES/NO
+   */
+  async getCommits(repositoryId?: string, contributorId?: string): Promise<Commit[]> {
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    let list = [...MOCK_COMMITS];
+    if (repositoryId) {
+      list = list.filter((c) => c.repositoryId === repositoryId);
+    }
+    if (contributorId) {
+      list = list.filter((c) => c.contributorId === contributorId);
+    }
+    return list;
+  },
+
+  /**
+   * Mengambil detail commit spesifik
+   */
+  async getCommitById(commitId: string): Promise<Commit | null> {
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    const found = MOCK_COMMITS.find((c) => c.id === commitId || c.shortSha === commitId);
+    return found ? { ...found } : null;
+  },
+
+  /**
+   * Mengambil riwayat aktivitas analisis yang pernah dijalankan
+   */
+  async getHistory(): Promise<AnalysisHistoryItem[]> {
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    return [...MOCK_ANALYSIS_HISTORY];
+  },
+};
