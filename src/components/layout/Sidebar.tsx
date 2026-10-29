@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -14,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useLayout } from '../../contexts/LayoutContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { cn } from '../../utils/cn';
 
 interface NavItem {
@@ -65,10 +67,10 @@ export function Sidebar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleLogout = () => {
-    logout();
-    navigate('/login', { replace: true });
+    setShowLogoutConfirm(true);
   };
 
   return (
@@ -215,15 +217,15 @@ export function Sidebar() {
             {/* Avatar Inisial */}
             <div
               className="w-8 h-8 rounded-full bg-app-accent-primary/20 border border-app-accent-primary/40 flex items-center justify-center text-xs font-semibold text-app-accent-primary shrink-0"
-              title={user?.name ?? 'Dosen Akademik'}
+              title={user?.name ?? 'Dr. Rizky Hendarman'}
             >
-              {user?.avatarInitials ?? 'DA'}
+              {user?.avatarInitials ?? 'RH'}
             </div>
 
             {(!isCollapsed || isMobileOpen) && (
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-app-text-primary truncate">
-                  {user?.name ?? 'Dosen Akademik'}
+                  {user?.name ?? 'Dr. Rizky Hendarman'}
                 </p>
                 <span className="inline-block px-1.5 py-0.2 rounded text-[10px] bg-app-secondary text-app-text-secondary border border-app-border mt-0.5">
                   {user?.role ?? 'Dosen'}
@@ -273,6 +275,22 @@ export function Sidebar() {
           </button>
         </div>
       </aside>
+
+      {/* Modal Konfirmasi Logout */}
+      <ConfirmDialog
+        isOpen={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={() => {
+          setShowLogoutConfirm(false);
+          logout();
+          navigate('/login', { replace: true });
+        }}
+        title="Konfirmasi Keluar Sesi"
+        description="Apakah Anda yakin ingin keluar dari sistem GitContrib? Sesi Dosen Anda akan diakhiri dan dialihkan kembali ke halaman login."
+        confirmText="Ya, Keluar"
+        cancelText="Batal"
+        variant="danger"
+      />
     </>
   );
 }

@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../components/ui/Card';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme, ThemeMode } from '../../contexts/ThemeContext';
 import { cn } from '../../utils/cn';
@@ -111,6 +112,7 @@ export function SettingsPage() {
 
   // ── Logout ─────────────────────────────────────────────────────────────────
   const [loggingOut, setLoggingOut] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const themeOptions: Array<{ mode: ThemeMode; label: string; desc: string; icon: React.ComponentType<{ className?: string }> }> = [
     { mode: 'light', label: 'Mode Terang', desc: 'Latar belakang bersih dan kontras tinggi', icon: Sun },
@@ -247,19 +249,16 @@ export function SettingsPage() {
             <div className="flex items-center gap-4 mb-4">
               {/* Avatar */}
               <div className="w-14 h-14 rounded-full bg-gradient-to-br from-app-accent-primary to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-md shrink-0 select-none">
-                {user?.avatarInitials ?? 'D'}
+                {user?.avatarInitials ?? 'RH'}
               </div>
               <div>
-                <p className="text-sm font-bold text-app-text-primary">{user?.name}</p>
-                <p className="text-xs text-app-text-secondary mt-0.5">{user?.role}</p>
-                <p className="text-[11px] text-app-accent-primary/80 font-mono mt-0.5">
-                  NIDN: {user?.nidn}
-                </p>
+                <p className="text-sm font-bold text-app-text-primary">{user?.name ?? 'Dr. Rizky Hendarman'}</p>
+                <p className="text-xs text-app-text-secondary mt-0.5">{user?.role ?? 'Dosen'}</p>
               </div>
             </div>
-            <InfoRow label="Email" value={user?.email ?? '—'} />
-            <InfoRow label="Program Studi" value={user?.department ?? '—'} />
-            <InfoRow label="Institusi" value={user?.institution ?? '—'} />
+            <InfoRow label="Email" value={user?.email ?? 'dosen@polibatam.ac.id'} />
+            <InfoRow label="Program Studi" value={user?.department ?? 'Teknik Informatika'} />
+            <InfoRow label="Institusi" value={user?.institution ?? 'Politeknik Negeri Batam'} />
             <InfoRow
               label="Login Terakhir"
               value={
@@ -304,7 +303,7 @@ export function SettingsPage() {
               />
               <p className="text-[11px] text-app-text-secondary flex items-center gap-1">
                 <BadgeInfo className="w-3 h-3" />
-                Email dan NIDN tidak dapat diubah melalui antarmuka ini.
+                Email dan institusi terdaftar dikelola oleh sistem.
               </p>
             </div>
           </div>
@@ -445,21 +444,7 @@ export function SettingsPage() {
               className="w-full px-3 py-2.5 text-sm rounded-lg border border-app-border bg-app-secondary/50 text-app-text-primary focus:outline-none focus:ring-2 focus:ring-app-accent-primary/30 focus:border-app-accent-primary/60 transition-all duration-150"
             />
             <p className="text-[11px] text-app-text-secondary">
-              Branch utama yang akan dievaluasi saat repository didaftarkan.
-            </p>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-app-text-primary">
-              Tahun Akademik &amp; Semester
-            </label>
-            <input
-              type="text"
-              defaultValue="2024/2025 - Ganjil"
-              className="w-full px-3 py-2.5 text-sm rounded-lg border border-app-border bg-app-secondary/50 text-app-text-primary focus:outline-none focus:ring-2 focus:ring-app-accent-primary/30 focus:border-app-accent-primary/60 transition-all duration-150"
-            />
-            <p className="text-[11px] text-app-text-secondary">
-              Konteks semester perkuliahan PBL.
+              Branch utama yang akan dievaluasi saat repository dianalisis.
             </p>
           </div>
 
@@ -484,9 +469,9 @@ export function SettingsPage() {
           </div>
           <button
             type="button"
-            onClick={handleLogout}
+            onClick={() => setShowLogoutConfirm(true)}
             disabled={loggingOut}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold bg-rose-500 text-white shadow transition-all hover:bg-rose-600 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed shrink-0"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold bg-rose-500 text-white shadow transition-all hover:bg-rose-600 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed shrink-0 cursor-pointer"
           >
             {loggingOut ? (
               <><Loader2 className="w-4 h-4 animate-spin" /> Keluar...</>
@@ -496,6 +481,22 @@ export function SettingsPage() {
           </button>
         </div>
       </div>
+
+      {/* Modal Konfirmasi Logout */}
+      <ConfirmDialog
+        isOpen={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={async () => {
+          setShowLogoutConfirm(false);
+          await handleLogout();
+        }}
+        title="Konfirmasi Keluar Sesi"
+        description="Apakah Anda yakin ingin keluar dari sistem GitContrib? Sesi Dosen Anda akan diakhiri dan dialihkan kembali ke halaman login."
+        confirmText="Ya, Keluar"
+        cancelText="Batal"
+        variant="danger"
+        isLoading={loggingOut}
+      />
     </div>
   );
 }

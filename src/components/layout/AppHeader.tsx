@@ -10,6 +10,7 @@ import {
 import { useLayout } from '../../contexts/LayoutContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { ThemeToggle } from '../common/ThemeToggle';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { cn } from '../../utils/cn';
 
 interface BreadcrumbItem {
@@ -25,6 +26,7 @@ export function AppHeader() {
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown on outside click
@@ -241,7 +243,7 @@ export function AppHeader() {
 
               <div className="hidden sm:block text-left">
                 <span className="text-xs font-medium text-app-text-primary block leading-none truncate max-w-[120px]">
-                  {user?.name ?? 'Dosen Akademik'}
+                  {user?.name ?? 'Dr. Rizky Hendarman'}
                 </span>
                 <span className="text-[10px] text-app-text-secondary leading-none">
                   {user?.role ?? 'Dosen'}
@@ -257,9 +259,9 @@ export function AppHeader() {
                 className="absolute right-0 mt-2 w-56 rounded-md bg-app-card border border-app-border shadow-xl py-1.5 z-50 text-xs animate-fadeIn"
               >
                 <div className="px-3 py-2 border-b border-app-border">
-                  <p className="font-semibold text-app-text-primary truncate">{user?.name ?? 'Dosen Akademik'}</p>
+                  <p className="font-semibold text-app-text-primary truncate">{user?.name ?? 'Dr. Rizky Hendarman'}</p>
                   <p className="text-[11px] text-app-text-secondary truncate">
-                    {user?.email ?? 'dosen.pbl@polibatam.ac.id'}
+                    {user?.email ?? 'dosen@polibatam.ac.id'}
                   </p>
                   <span className="inline-block px-1.5 py-0.5 rounded text-[10px] bg-app-secondary text-app-text-secondary border border-app-border mt-1.5">
                     {user?.department ?? 'Teknik Informatika'}
@@ -299,10 +301,9 @@ export function AppHeader() {
                   role="menuitem"
                   onClick={() => {
                     setIsProfileOpen(false);
-                    logout();
-                    navigate('/login', { replace: true });
+                    setShowLogoutConfirm(true);
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-app-accent-negative hover:bg-app-secondary text-left transition-colors font-medium"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-app-accent-negative hover:bg-app-secondary text-left transition-colors font-medium cursor-pointer"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>Keluar</span>
@@ -312,6 +313,22 @@ export function AppHeader() {
           </div>
         </div>
       </header>
+
+      {/* Modal Konfirmasi Logout */}
+      <ConfirmDialog
+        isOpen={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={() => {
+          setShowLogoutConfirm(false);
+          logout();
+          navigate('/login', { replace: true });
+        }}
+        title="Konfirmasi Keluar Sesi"
+        description="Apakah Anda yakin ingin keluar dari sistem GitContrib? Sesi Dosen Anda akan diakhiri dan dialihkan kembali ke halaman login."
+        confirmText="Ya, Keluar"
+        cancelText="Batal"
+        variant="danger"
+      />
 
       {/* Modal dialog profil sederhana */}
       {showProfileModal && (
@@ -323,14 +340,14 @@ export function AppHeader() {
           <div className="w-full max-w-sm bg-app-card border border-app-border rounded-lg shadow-2xl p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-full bg-app-accent-primary/20 border border-app-accent-primary/40 flex items-center justify-center text-sm font-semibold text-app-accent-primary">
-                {user?.avatarInitials ?? 'DA'}
+                {user?.avatarInitials ?? 'RH'}
               </div>
               <div>
                 <h3 className="text-sm font-semibold text-app-text-primary">
-                  {user?.name ?? 'Dosen Akademik'}
+                  {user?.name ?? 'Dr. Rizky Hendarman'}
                 </h3>
                 <p className="text-xs text-app-text-secondary">
-                  {user?.email ?? 'dosen.pbl@polibatam.ac.id'}
+                  {user?.email ?? 'dosen@polibatam.ac.id'}
                 </p>
               </div>
             </div>
@@ -343,10 +360,6 @@ export function AppHeader() {
               <div className="flex justify-between">
                 <span>Jurusan:</span>
                 <span className="text-app-text-primary font-medium">{user?.department ?? 'Teknik Informatika'}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>NIDN:</span>
-                <span className="text-app-text-primary font-medium font-mono">{user?.nidn ?? '0012345678'}</span>
               </div>
               <div className="flex justify-between">
                 <span>Institusi:</span>
