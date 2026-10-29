@@ -158,7 +158,7 @@ export function CommitFilesList({
         <div className="p-3.5 bg-app-secondary/30 border-t border-app-border/60 flex items-center gap-2 text-[11px] text-app-text-secondary">
           <Info className="w-3.5 h-3.5 text-app-accent-primary shrink-0" />
           <span>
-            Daftar file di atas bersumber dari data commit simulasi prototype. GitContrib tidak mengarang isi baris Git diff sintetis demi menjaga integritas data.
+            Daftar file di atas bersumber dari data riwayat commit yang dievaluasi.
           </span>
         </div>
       </CardContent>

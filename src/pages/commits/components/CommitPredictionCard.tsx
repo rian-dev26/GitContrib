@@ -21,9 +21,9 @@ export function CommitPredictionCard({ classification }: CommitPredictionCardPro
     ? Math.round(classification.confidence * 100)
     : 85;
 
-  const modelVersion = classification?.metadata?.modelVersion || 'proto-v0.1-rf';
+  const modelVersion = classification?.metadata?.modelVersion || 'v1.0-rf';
   const algorithm =
-    classification?.metadata?.algorithm || 'Supervised Random Forest (Prototype)';
+    classification?.metadata?.algorithm || 'Supervised Random Forest';
   const evaluatedAt = classification?.metadata?.evaluatedAt
     ? new Date(classification.metadata.evaluatedAt).toLocaleDateString('id-ID', {
         day: 'numeric',
@@ -132,7 +132,7 @@ export function CommitPredictionCard({ classification }: CommitPredictionCardPro
           {/* Model Specification */}
           <div className="p-4 rounded-xl border border-app-border bg-app-secondary/30 flex flex-col justify-between space-y-2 text-xs">
             <span className="text-xs font-medium text-app-text-secondary">
-              Spesifikasi Prototype
+              Spesifikasi Model
             </span>
             <div className="space-y-1.5 font-mono text-[11px]">
               <div className="flex items-center justify-between">
@@ -175,7 +175,7 @@ export function CommitPredictionCard({ classification }: CommitPredictionCardPro
         <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg flex items-start gap-2.5 text-xs text-amber-800 dark:text-amber-300">
           <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
           <div className="leading-relaxed text-[11px]">
-            <strong>Catatan Transparansi Model:</strong> Prediksi YES/NO dihasilkan secara otomatis oleh prototype model Machine Learning pada tingkat commit individual untuk membantu pemetaan aktivitas. Hasil ini <strong>bukan</strong> representasi tunggal dari penilaian akademik, nilai PBL, atau dedikasi mahasiswa.
+            <strong>Catatan Transparansi Model:</strong> Prediksi YES/NO dihasilkan secara otomatis oleh model Machine Learning pada tingkat commit individual untuk membantu pemetaan aktivitas riwayat Git.
           </div>
         </div>
       </CardContent>

@@ -26,19 +26,19 @@ interface AuthContextType {
 // ─── Mock Credentials ─────────────────────────────────────────────────────────
 
 const MOCK_CREDENTIAL = {
-  email: 'dosen.pbl@polibatam.ac.id',
+  email: 'dosen@polibatam.ac.id',
   password: 'GitContrib2024!',
 };
 
 const MOCK_USER: AuthUser = {
   id: 'user-dosen-01',
-  name: 'Dr. Rizky Hendarman, M.T.',
-  email: 'dosen.pbl@polibatam.ac.id',
-  nidn: '1004198501001',
+  name: 'Dr. Rizky Hendarman',
+  email: 'dosen@polibatam.ac.id',
+  nidn: '',
   department: 'Teknik Informatika',
   institution: 'Politeknik Negeri Batam',
   avatarInitials: 'RH',
-  role: 'Dosen Pengampu',
+  role: 'Dosen',
   lastLogin: new Date().toISOString(),
 };
 
@@ -64,17 +64,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
       setIsLoading(true);
       // Simulate network delay
-      await new Promise((res) => setTimeout(res, 900));
+      await new Promise((res) => setTimeout(res, 600));
 
       const trimmedEmail = email.trim().toLowerCase();
-      const isValidEmail = trimmedEmail === MOCK_CREDENTIAL.email;
+      const isValidEmail =
+        trimmedEmail === MOCK_CREDENTIAL.email ||
+        trimmedEmail === 'dosen.pbl@polibatam.ac.id' ||
+        (trimmedEmail.length > 3 && trimmedEmail.includes('@'));
       const isValidPass =
         password === MOCK_CREDENTIAL.password || password.length >= 6;
 
       setIsLoading(false);
 
       if (!isValidEmail) {
-        return { success: false, error: 'Email tidak terdaftar di sistem.' };
+        return { success: false, error: 'Format email tidak valid.' };
       }
       if (!isValidPass) {
         return {
@@ -83,7 +86,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         };
       }
 
-      const loggedUser: AuthUser = { ...MOCK_USER, lastLogin: new Date().toISOString() };
+      const loggedUser: AuthUser = {
+        ...MOCK_USER,
+        email: trimmedEmail,
+        lastLogin: new Date().toISOString(),
+      };
       setUser(loggedUser);
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(loggedUser));
       return { success: true };

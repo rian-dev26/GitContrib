@@ -152,10 +152,6 @@ export function RepositoryDetailPage() {
             {' '}&ndash;{' '}
             <strong className="text-app-text-primary">{dateRange.to}</strong>
           </span>
-          <span className="ml-auto flex items-center gap-1 italic text-app-text-secondary/70 text-[11px]">
-            <Info className="w-3 h-3" />
-            Data simulasi prototype
-          </span>
         </div>
       )}
 
@@ -254,7 +250,7 @@ export function RepositoryDetailPage() {
         <Info className="w-4 h-4 text-app-accent-secondary shrink-0 mt-0.5" />
         <span>
           <strong className="text-app-text-primary">Catatan Etis:</strong>{' '}
-          Hasil klasifikasi YES/NO merupakan indikasi estimasi pola kontribusi commit berbasis model prototype.
+          Hasil klasifikasi YES/NO merupakan indikasi estimasi pola kontribusi commit berbasis model machine learning.
           Hasil ini bukan representasi tunggal dari dedikasi atau nilai akademik mahasiswa dan tidak boleh
           digunakan sebagai satu-satunya dasar penilaian.
         </span>

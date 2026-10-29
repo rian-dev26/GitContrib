@@ -273,8 +273,8 @@ function makeCommit(
       label,
       confidence,
       metadata: {
-        modelVersion: 'proto-v0.1-rf',
-        algorithm: 'Supervised Random Forest (Prototype)',
+        modelVersion: 'v1.0-rf',
+        algorithm: 'Supervised Random Forest',
         evaluatedAt: '2024-10-25T14:30:00Z',
         featuresUsed: ['code_churn', 'file_diversity', 'message_clarity', 'diff_entropy'],
       },
@@ -399,7 +399,7 @@ export const MOCK_ANALYSIS_SUMMARY: AnalysisSummary = {
     to: '2024-10-25',
   },
   notice:
-    'Hasil klasifikasi YES/NO merupakan indikasi estimasi pola kontribusi commit berbasis model prototype. Hasil ini bukan representasi tunggal dari dedikasi atau nilai akademik mahasiswa.',
+    'Hasil klasifikasi YES/NO merupakan indikasi estimasi pola kontribusi commit berbasis model machine learning. Hasil ini bukan representasi tunggal dari dedikasi atau nilai akademik mahasiswa.',
 };
 
 export const MOCK_ANALYSIS_HISTORY: AnalysisHistoryItem[] = [
@@ -414,7 +414,7 @@ export const MOCK_ANALYSIS_HISTORY: AnalysisHistoryItem[] = [
     completedAt: '2024-10-25T14:30:00Z',
     totalCommits: 52,
     totalContributors: 4,
-    triggeredBy: 'Dosen Pengampu IF314',
+    triggeredBy: 'Dosen',
   },
   {
     id: 'hist-02',
@@ -427,7 +427,7 @@ export const MOCK_ANALYSIS_HISTORY: AnalysisHistoryItem[] = [
     completedAt: '2024-10-26T10:00:00Z',
     totalCommits: 98,
     totalContributors: 5,
-    triggeredBy: 'Dosen Pengampu IF314',
+    triggeredBy: 'Dosen',
   },
   {
     id: 'hist-03',
@@ -440,7 +440,7 @@ export const MOCK_ANALYSIS_HISTORY: AnalysisHistoryItem[] = [
     completedAt: '2024-10-24T11:17:30Z',
     totalCommits: 64,
     totalContributors: 3,
-    triggeredBy: 'Dosen Pengampu IF314',
+    triggeredBy: 'Dosen',
   },
   {
     id: 'hist-04',
@@ -453,7 +453,7 @@ export const MOCK_ANALYSIS_HISTORY: AnalysisHistoryItem[] = [
     completedAt: '2024-10-23T16:22:45Z',
     totalCommits: 76,
     totalContributors: 4,
-    triggeredBy: 'Dosen Pengampu IF314',
+    triggeredBy: 'Dosen',
   },
   {
     id: 'hist-05',
@@ -466,7 +466,7 @@ export const MOCK_ANALYSIS_HISTORY: AnalysisHistoryItem[] = [
     completedAt: undefined,
     totalCommits: 45,
     totalContributors: 4,
-    triggeredBy: 'Dosen Pengampu IF314',
+    triggeredBy: 'Dosen',
   },
   {
     id: 'hist-06',
@@ -479,7 +479,7 @@ export const MOCK_ANALYSIS_HISTORY: AnalysisHistoryItem[] = [
     completedAt: '2024-10-22T13:41:10Z',
     totalCommits: 0,
     totalContributors: 0,
-    triggeredBy: 'Dosen Pengampu IF314',
+    triggeredBy: 'Dosen',
   },
   {
     id: 'hist-07',
@@ -492,7 +492,7 @@ export const MOCK_ANALYSIS_HISTORY: AnalysisHistoryItem[] = [
     completedAt: '2024-10-20T10:02:15Z',
     totalCommits: 88,
     totalContributors: 5,
-    triggeredBy: 'Dosen Pengampu IF314',
+    triggeredBy: 'Dosen',
   },
   {
     id: 'hist-08',
@@ -505,6 +505,6 @@ export const MOCK_ANALYSIS_HISTORY: AnalysisHistoryItem[] = [
     completedAt: '2024-10-18T14:07:20Z',
     totalCommits: 53,
     totalContributors: 3,
-    triggeredBy: 'Dosen Pengampu IF314',
+    triggeredBy: 'Dosen',
   },
 ];

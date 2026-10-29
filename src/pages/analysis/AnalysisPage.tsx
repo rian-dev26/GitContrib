@@ -171,12 +171,7 @@ export function AnalysisPage() {
     <div className="space-y-6 max-w-4xl">
       <PageHeader
         title="Analisis Repository GitHub"
-        description="Jalankan ekstraksi histori Git dan klasifikasi Machine Learning YES/NO untuk memahami pola kontribusi anggota tim PBL."
-        badge={
-          <Badge variant="secondary" size="sm">
-            Mode Prototype Frontend
-          </Badge>
-        }
+        description="Jalankan ekstraksi histori Git dan klasifikasi Machine Learning YES/NO untuk memahami pola kontribusi anggota tim."
       />
 
       <EthicalNoticeCard />
@@ -359,7 +354,7 @@ export function AnalysisPage() {
             </div>
 
             <div className="text-xs text-app-text-secondary space-y-1">
-              <p className="font-semibold text-app-text-primary">Panduan Solusi untuk Dosen:</p>
+              <p className="font-semibold text-app-text-primary">Panduan Solusi:</p>
               <ul className="list-disc list-inside space-y-0.5 text-app-text-secondary">
                 <li>Pastikan repository berstatus <strong>Publik</strong> dan dapat di-clone tanpa login.</li>
                 <li>Periksa ejaan URL repository (contoh yang valid: <code>https://github.com/owner/repository</code>).</li>
@@ -499,8 +494,7 @@ export function AnalysisPage() {
               <ul className="text-app-text-secondary list-disc list-inside space-y-0.5">
                 <li>Repository privat memerlukan konfigurasi personal access token terpisah</li>
                 <li>Tidak menganalisis aktivitas offline / non-Git mahasiswa</li>
-                <li>Tidak menggantikan rubrik penilaian akademik dosen</li>
-                <li>Saat ini berjalan dalam mode simulasi prototype frontend</li>
+                <li>Tidak menggantikan rubrik penilaian akademik</li>
               </ul>
             </div>
           </div>

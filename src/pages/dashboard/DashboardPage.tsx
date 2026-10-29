@@ -4,7 +4,6 @@ import { Plus, Clock } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { EthicalNoticeCard } from '../../components/common/EthicalNoticeCard';
 import { Button } from '../../components/ui/Button';
-import { Badge } from '../../components/ui/Badge';
 import { MOCK_DASHBOARD_DATA } from '../../mocks/dashboard';
 import { DashboardData } from '../../types/dashboard';
 
@@ -35,13 +34,6 @@ export function DashboardPage() {
       <PageHeader
         title="Dashboard"
         description="Ringkasan aktivitas repository dan pola kontribusi"
-        badge={
-          data.isPrototype ? (
-            <Badge variant="secondary" size="sm">
-              Mode Prototype
-            </Badge>
-          ) : undefined
-        }
         actions={
           <div className="flex items-center gap-3">
             <div className="hidden md:flex items-center gap-1.5 text-xs text-app-text-secondary bg-app-card px-3 py-1.5 rounded-md border border-app-border">
