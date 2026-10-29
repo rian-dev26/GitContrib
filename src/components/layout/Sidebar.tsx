@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
   GitBranch,
@@ -40,12 +40,12 @@ const navItems: NavItem[] = [
   },
   {
     label: 'Contributor',
-    to: '/contributors/demo',
+    to: '/contributors/contrib-01',
     icon: Users,
   },
   {
     label: 'Detail Commit',
-    to: '/commits/demo',
+    to: '/commits/a1b2c3d',
     icon: GitCommitHorizontal,
   },
   {
@@ -53,12 +53,18 @@ const navItems: NavItem[] = [
     to: '/reports',
     icon: FileBarChart,
   },
+  {
+    label: 'Pengaturan',
+    to: '/settings',
+    icon: Settings,
+  },
 ];
 
 export function Sidebar() {
   const { isCollapsed, toggleCollapsed, isMobileOpen, closeMobileDrawer } = useLayout();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
@@ -136,6 +142,11 @@ export function Sidebar() {
 
           {navItems.map((item) => {
             const Icon = item.icon;
+            const rootSegment = item.to.split('/')[1];
+            const isSectionActive =
+              location.pathname === item.to ||
+              (rootSegment !== 'dashboard' && location.pathname.startsWith(`/${rootSegment}`));
+
             return (
               <NavLink
                 key={item.to}
@@ -144,54 +155,48 @@ export function Sidebar() {
                 onClick={() => {
                   if (isMobileOpen) closeMobileDrawer();
                 }}
-                className={({ isActive }) =>
-                  cn(
-                    'group relative flex items-center rounded-md text-xs font-medium transition-colors duration-150',
-                    isCollapsed && !isMobileOpen
-                      ? 'justify-center h-10 w-10 mx-auto px-0'
-                      : 'gap-3 px-3 py-2.5',
-                    isActive
-                      ? 'bg-app-secondary/80 text-app-text-primary font-semibold shadow-sm'
-                      : 'text-app-text-secondary hover:text-app-text-primary hover:bg-app-secondary/50'
-                  )
-                }
+                className={cn(
+                  'group relative flex items-center rounded-md text-xs font-medium transition-colors duration-150',
+                  isCollapsed && !isMobileOpen
+                    ? 'justify-center h-10 w-10 mx-auto px-0'
+                    : 'gap-3 px-3 py-2.5',
+                  isSectionActive
+                    ? 'bg-app-secondary/80 text-app-text-primary font-semibold shadow-sm'
+                    : 'text-app-text-secondary hover:text-app-text-primary hover:bg-app-secondary/50'
+                )}
               >
-                {({ isActive }) => (
-                  <>
-                    {/* Indikator aksen biru yang tipis saat menu aktif */}
-                    {isActive && (
-                      <span
-                        className={cn(
-                          'absolute bg-app-accent-primary rounded-full transition-all',
-                          isCollapsed && !isMobileOpen
-                            ? 'left-0 top-2 bottom-2 w-1'
-                            : 'left-0 top-1.5 bottom-1.5 w-1 rounded-r-md'
-                        )}
-                        aria-hidden="true"
-                      />
+                {/* Indikator aksen biru yang tipis saat menu aktif */}
+                {isSectionActive && (
+                  <span
+                    className={cn(
+                      'absolute bg-app-accent-primary rounded-full transition-all',
+                      isCollapsed && !isMobileOpen
+                        ? 'left-0 top-2 bottom-2 w-1'
+                        : 'left-0 top-1.5 bottom-1.5 w-1 rounded-r-md'
                     )}
+                    aria-hidden="true"
+                  />
+                )}
 
-                    <Icon
-                      className={cn(
-                        'shrink-0 stroke-[1.8] transition-colors',
-                        isCollapsed && !isMobileOpen ? 'w-5 h-5' : 'w-4 h-4',
-                        isActive
-                          ? 'text-app-accent-primary'
-                          : 'text-app-text-secondary group-hover:text-app-text-primary'
-                      )}
-                    />
+                <Icon
+                  className={cn(
+                    'shrink-0 stroke-[1.8] transition-colors',
+                    isCollapsed && !isMobileOpen ? 'w-5 h-5' : 'w-4 h-4',
+                    isSectionActive
+                      ? 'text-app-accent-primary'
+                      : 'text-app-text-secondary group-hover:text-app-text-primary'
+                  )}
+                />
 
-                    {(!isCollapsed || isMobileOpen) && (
-                      <span className="truncate">{item.label}</span>
-                    )}
+                {(!isCollapsed || isMobileOpen) && (
+                  <span className="truncate">{item.label}</span>
+                )}
 
-                    {/* Tooltip hover saat sidebar desktop dalam mode icon */}
-                    {isCollapsed && !isMobileOpen && (
-                      <div className="absolute left-full ml-3 px-2.5 py-1 bg-app-card text-app-text-primary text-xs rounded border border-app-border shadow-lg whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50">
-                        {item.label}
-                      </div>
-                    )}
-                  </>
+                {/* Tooltip hover saat sidebar desktop dalam mode icon */}
+                {isCollapsed && !isMobileOpen && (
+                  <div className="absolute left-full ml-3 px-2.5 py-1 bg-app-card text-app-text-primary text-xs rounded border border-app-border shadow-lg whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50">
+                    {item.label}
+                  </div>
                 )}
               </NavLink>
             );

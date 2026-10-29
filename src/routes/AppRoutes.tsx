@@ -42,9 +42,21 @@ export function AppRoutes() {
       <Route element={<ProtectedAppLayout />}>
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/analysis" element={<AnalysisPage />} />
+
+        {/* Repositories & alias */}
+        <Route path="/repositories" element={<Navigate to="/repositories/repo-pbl-01" replace />} />
         <Route path="/repositories/:repositoryId" element={<RepositoryDetailPage />} />
+        <Route path="/repository" element={<Navigate to="/repositories/repo-pbl-01" replace />} />
+        <Route path="/repository/:repositoryId" element={<RepositoryDetailPage />} />
+
+        {/* Contributors & alias */}
+        <Route path="/contributors" element={<Navigate to="/contributors/contrib-01" replace />} />
         <Route path="/contributors/:contributorId" element={<ContributorDetailPage />} />
+
+        {/* Commits & alias */}
+        <Route path="/commits" element={<Navigate to="/commits/a1b2c3d" replace />} />
         <Route path="/commits/:commitId" element={<CommitDetailPage />} />
+
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/settings" element={<SettingsPage />} />

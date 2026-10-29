@@ -8,6 +8,7 @@ import {
   LogOut,
 } from 'lucide-react';
 import { useLayout } from '../../contexts/LayoutContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { ThemeToggle } from '../common/ThemeToggle';
 import { cn } from '../../utils/cn';
 
@@ -18,6 +19,7 @@ interface BreadcrumbItem {
 
 export function AppHeader() {
   const { toggleMobileOpen, toggleCollapsed } = useLayout();
+  const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -183,17 +185,17 @@ export function AppHeader() {
                 isProfileOpen && 'bg-app-secondary border-[#4A4D54]'
               )}
             >
-              {/* Avatar inisial DA */}
+              {/* Avatar inisial */}
               <div className="w-7 h-7 rounded-full bg-app-accent-primary/20 border border-app-accent-primary/40 flex items-center justify-center text-xs font-semibold text-app-accent-primary shrink-0">
-                DA
+                {user?.avatarInitials ?? 'DA'}
               </div>
 
               <div className="hidden sm:block text-left">
-                <span className="text-xs font-medium text-app-text-primary block leading-none">
-                  Dosen Akademik
+                <span className="text-xs font-medium text-app-text-primary block leading-none truncate max-w-[120px]">
+                  {user?.name ?? 'Dosen Akademik'}
                 </span>
                 <span className="text-[10px] text-app-text-secondary leading-none">
-                  Dosen
+                  {user?.role ?? 'Dosen'}
                 </span>
               </div>
             </button>
@@ -203,15 +205,15 @@ export function AppHeader() {
               <div
                 role="menu"
                 aria-label="Opsi Profil"
-                className="absolute right-0 mt-2 w-52 rounded-md bg-app-card border border-app-border shadow-xl py-1.5 z-50 text-xs animate-fadeIn"
+                className="absolute right-0 mt-2 w-56 rounded-md bg-app-card border border-app-border shadow-xl py-1.5 z-50 text-xs animate-fadeIn"
               >
                 <div className="px-3 py-2 border-b border-app-border">
-                  <p className="font-semibold text-app-text-primary">Dosen Akademik</p>
+                  <p className="font-semibold text-app-text-primary truncate">{user?.name ?? 'Dosen Akademik'}</p>
                   <p className="text-[11px] text-app-text-secondary truncate">
-                    dosen.pbl@polibatam.ac.id
+                    {user?.email ?? 'dosen.pbl@polibatam.ac.id'}
                   </p>
                   <span className="inline-block px-1.5 py-0.5 rounded text-[10px] bg-app-secondary text-app-text-secondary border border-app-border mt-1.5">
-                    Evaluator PBL IF314
+                    {user?.department ?? 'Teknik Informatika'}
                   </span>
                 </div>
 
@@ -248,9 +250,10 @@ export function AppHeader() {
                   role="menuitem"
                   onClick={() => {
                     setIsProfileOpen(false);
-                    navigate('/login');
+                    logout();
+                    navigate('/login', { replace: true });
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-app-accent-negative hover:bg-app-secondary text-left transition-colors"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-app-accent-negative hover:bg-app-secondary text-left transition-colors font-medium"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>Keluar</span>
@@ -271,14 +274,14 @@ export function AppHeader() {
           <div className="w-full max-w-sm bg-app-card border border-app-border rounded-lg shadow-2xl p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-full bg-app-accent-primary/20 border border-app-accent-primary/40 flex items-center justify-center text-sm font-semibold text-app-accent-primary">
-                DA
+                {user?.avatarInitials ?? 'DA'}
               </div>
               <div>
                 <h3 className="text-sm font-semibold text-app-text-primary">
-                  Dosen Akademik
+                  {user?.name ?? 'Dosen Akademik'}
                 </h3>
                 <p className="text-xs text-app-text-secondary">
-                  dosen.pbl@polibatam.ac.id
+                  {user?.email ?? 'dosen.pbl@polibatam.ac.id'}
                 </p>
               </div>
             </div>
@@ -286,23 +289,37 @@ export function AppHeader() {
             <div className="space-y-2 text-xs text-app-text-secondary border-t border-b border-app-border py-3 my-3">
               <div className="flex justify-between">
                 <span>Peran:</span>
-                <span className="text-app-text-primary font-medium">Dosen Pengampu</span>
+                <span className="text-app-text-primary font-medium">{user?.role ?? 'Dosen'}</span>
               </div>
               <div className="flex justify-between">
-                <span>Mata Kuliah:</span>
-                <span className="text-app-text-primary font-medium">IF314 Proyek Inovasi Agile</span>
+                <span>Jurusan:</span>
+                <span className="text-app-text-primary font-medium">{user?.department ?? 'Teknik Informatika'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>NIDN:</span>
+                <span className="text-app-text-primary font-medium font-mono">{user?.nidn ?? '0012345678'}</span>
               </div>
               <div className="flex justify-between">
                 <span>Institusi:</span>
-                <span className="text-app-text-primary font-medium">Politeknik Negeri Batam</span>
+                <span className="text-app-text-primary font-medium">{user?.institution ?? 'Politeknik Negeri Batam'}</span>
               </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowProfileModal(false);
+                  navigate('/settings');
+                }}
+                className="px-3 py-1.5 text-xs font-medium rounded-md bg-app-accent-primary text-white hover:bg-app-accent-primary-hover transition-colors"
+              >
+                Ubah di Pengaturan
+              </button>
               <button
                 type="button"
                 onClick={() => setShowProfileModal(false)}
-                className="px-4 py-1.5 text-xs font-medium rounded-md bg-app-secondary text-app-text-primary hover:bg-[#343840] border border-app-border transition-colors"
+                className="px-3 py-1.5 text-xs font-medium rounded-md bg-app-secondary text-app-text-primary hover:bg-app-border/40 border border-app-border transition-colors"
               >
                 Tutup
               </button>

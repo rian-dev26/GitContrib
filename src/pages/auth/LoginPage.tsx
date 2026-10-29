@@ -1,4 +1,4 @@
-import { useState, useId } from 'react';
+import { useState, useId, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   LogIn,
@@ -61,9 +61,16 @@ function Field({ id, label, error, children }: FieldProps) {
 export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isLoading } = useAuth();
+  const { login, isLoading, isAuthenticated } = useAuth();
   const emailId = useId();
   const passwordId = useId();
+
+  // Redirect jika sudah login
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const [email, setEmail] = useState('dosen.pbl@polibatam.ac.id');
   const [password, setPassword] = useState('');
