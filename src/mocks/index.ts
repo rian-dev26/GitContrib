@@ -2,6 +2,7 @@ import {
   Repository,
   Contributor,
   Commit,
+  CommitFileChange,
   AnalysisSummary,
   AnalysisHistoryItem,
 } from '../types';
@@ -71,14 +72,14 @@ export const MOCK_CONTRIBUTORS: Contributor[] = [
     email: 'dimas.contoh@polibatam.ac.id',
     repositoryId: 'repo-pbl-01',
     metrics: {
-      totalCommits: 52,
-      classifiedYesCount: 44,
-      classifiedNoCount: 8,
-      yesRatio: 0.846,
+      totalCommits: 16,
+      classifiedYesCount: 14,
+      classifiedNoCount: 2,
+      yesRatio: 0.875,
       firstCommitDate: '2024-02-12T10:00:00Z',
       lastCommitDate: '2024-10-24T18:20:00Z',
-      totalAdditions: 3420,
-      totalDeletions: 890,
+      totalAdditions: 2979,
+      totalDeletions: 440,
     },
   },
   {
@@ -88,14 +89,14 @@ export const MOCK_CONTRIBUTORS: Contributor[] = [
     email: 'siti.contoh@polibatam.ac.id',
     repositoryId: 'repo-pbl-01',
     metrics: {
-      totalCommits: 41,
-      classifiedYesCount: 35,
-      classifiedNoCount: 6,
-      yesRatio: 0.853,
+      totalCommits: 13,
+      classifiedYesCount: 12,
+      classifiedNoCount: 1,
+      yesRatio: 0.923,
       firstCommitDate: '2024-02-14T11:30:00Z',
       lastCommitDate: '2024-10-23T14:10:00Z',
-      totalAdditions: 2150,
-      totalDeletions: 430,
+      totalAdditions: 1776,
+      totalDeletions: 288,
     },
   },
   {
@@ -105,14 +106,14 @@ export const MOCK_CONTRIBUTORS: Contributor[] = [
     email: 'rian.contoh@polibatam.ac.id',
     repositoryId: 'repo-pbl-01',
     metrics: {
-      totalCommits: 31,
-      classifiedYesCount: 22,
-      classifiedNoCount: 9,
-      yesRatio: 0.709,
+      totalCommits: 12,
+      classifiedYesCount: 9,
+      classifiedNoCount: 3,
+      yesRatio: 0.75,
       firstCommitDate: '2024-02-18T09:00:00Z',
       lastCommitDate: '2024-10-20T16:45:00Z',
-      totalAdditions: 1480,
-      totalDeletions: 620,
+      totalAdditions: 1282,
+      totalDeletions: 140,
     },
   },
   {
@@ -122,17 +123,117 @@ export const MOCK_CONTRIBUTORS: Contributor[] = [
     email: 'nurul.contoh@polibatam.ac.id',
     repositoryId: 'repo-pbl-01',
     metrics: {
-      totalCommits: 18,
-      classifiedYesCount: 12,
-      classifiedNoCount: 6,
-      yesRatio: 0.666,
+      totalCommits: 11,
+      classifiedYesCount: 9,
+      classifiedNoCount: 2,
+      yesRatio: 0.818,
       firstCommitDate: '2024-02-25T13:00:00Z',
       lastCommitDate: '2024-10-22T08:15:00Z',
-      totalAdditions: 890,
-      totalDeletions: 210,
+      totalAdditions: 1104,
+      totalDeletions: 166,
     },
   },
 ];
+
+// ─── Helper untuk generate daftar file dummy ──────────────────────────────────
+function generateCommitFiles(
+  message: string,
+  filesCount: number,
+  totalAdditions: number,
+  totalDeletions: number
+): CommitFileChange[] {
+  const lowerMsg = message.toLowerCase();
+  const pool: string[] = [];
+
+  if (lowerMsg.includes('readme') || lowerMsg.includes('docs')) {
+    pool.push('README.md', 'docs/API.md', 'docs/ARCHITECTURE.md');
+  } else if (lowerMsg.includes('barcode') || lowerMsg.includes('scanner')) {
+    pool.push(
+      'src/services/barcodeScanner.ts',
+      'src/components/scanner/BarcodeModal.tsx',
+      'src/types/inventory.ts',
+      'src/utils/scannerUtils.ts',
+      'src/hooks/useBarcodeReader.ts'
+    );
+  } else if (lowerMsg.includes('auth') || lowerMsg.includes('jwt') || lowerMsg.includes('user')) {
+    pool.push(
+      'src/services/authService.ts',
+      'src/middlewares/authMiddleware.ts',
+      'src/types/user.ts',
+      'src/pages/auth/LoginPage.tsx',
+      'src/components/common/UserAvatar.tsx'
+    );
+  } else if (lowerMsg.includes('chart') || lowerMsg.includes('dashboard')) {
+    pool.push(
+      'src/pages/dashboard/DashboardPage.tsx',
+      'src/components/charts/ActivityChart.tsx',
+      'src/types/dashboard.ts',
+      'src/services/dashboardService.ts'
+    );
+  } else if (lowerMsg.includes('test')) {
+    pool.push(
+      'src/tests/inventory.test.ts',
+      'src/tests/barcode.test.ts',
+      'src/tests/auth.test.ts',
+      'vitest.config.ts'
+    );
+  } else if (lowerMsg.includes('style') || lowerMsg.includes('css')) {
+    pool.push(
+      'src/styles/globals.css',
+      'tailwind.config.js',
+      'src/components/ui/Button.tsx',
+      'src/components/ui/Input.tsx'
+    );
+  } else if (lowerMsg.includes('database') || lowerMsg.includes('schema') || lowerMsg.includes('sql')) {
+    pool.push(
+      'src/database/schema.sql',
+      'src/database/migrations/001_initial.sql',
+      'src/database/repositories/itemRepo.ts',
+      'src/types/db.ts'
+    );
+  } else {
+    pool.push(
+      'src/modules/inventory/inventoryService.ts',
+      'src/modules/inventory/InventoryTable.tsx',
+      'src/types/inventory.ts',
+      'src/utils/formatters.ts',
+      'src/components/common/Header.tsx',
+      'src/api/client.ts'
+    );
+  }
+
+  const count = Math.max(1, filesCount);
+  const selectedFiles: string[] = [];
+  for (let i = 0; i < count; i++) {
+    selectedFiles.push(pool[i % pool.length] + (i >= pool.length ? `.${i}` : ''));
+  }
+
+  let remainingAdd = totalAdditions;
+  let remainingDel = totalDeletions;
+
+  return selectedFiles.map((filename, index) => {
+    const isLast = index === selectedFiles.length - 1;
+    let add = 0;
+    let del = 0;
+
+    if (isLast) {
+      add = remainingAdd;
+      del = remainingDel;
+    } else {
+      add = Math.floor(totalAdditions / count);
+      del = Math.floor(totalDeletions / count);
+      remainingAdd -= add;
+      remainingDel -= del;
+    }
+
+    return {
+      filename,
+      additions: add,
+      deletions: del,
+      changes: add + del,
+    };
+  });
+}
 
 // ─── Helper untuk generate commit dummy ────────────────────────────────────────
 function makeCommit(
@@ -167,6 +268,7 @@ function makeCommit(
       totalChanges: additions + deletions,
       filesChanged,
     },
+    files: generateCommitFiles(message, filesChanged, additions, deletions),
     classification: {
       label,
       confidence,
@@ -250,46 +352,46 @@ export const MOCK_ANALYSIS_SUMMARY: AnalysisSummary = {
   repositoryName: 'if-polibatam/smart-inventory-pbl',
   branch: 'main',
   analyzedAt: '2024-10-25T14:30:00Z',
-  totalCommitsAnalyzed: 142,
+  totalCommitsAnalyzed: 52,
   totalContributors: 4,
-  overallYesRatio: 0.795,
-  overallNoRatio: 0.205,
+  overallYesRatio: 0.846,
+  overallNoRatio: 0.154,
   contributorsSummary: [
     {
       contributorId: 'contrib-01',
       contributorName: 'Dimas Pratama (Contoh)',
       username: 'dimas-pbl',
-      totalCommits: 52,
-      yesCommits: 44,
-      noCommits: 8,
-      yesPercentage: 84.6,
+      totalCommits: 16,
+      yesCommits: 14,
+      noCommits: 2,
+      yesPercentage: 87.5,
     },
     {
       contributorId: 'contrib-02',
       contributorName: 'Siti Aisyah (Contoh)',
       username: 'siti-aisyah',
-      totalCommits: 41,
-      yesCommits: 35,
-      noCommits: 6,
-      yesPercentage: 85.3,
+      totalCommits: 13,
+      yesCommits: 12,
+      noCommits: 1,
+      yesPercentage: 92.3,
     },
     {
       contributorId: 'contrib-03',
       contributorName: 'Rian Hidayat (Contoh)',
       username: 'rian-h',
-      totalCommits: 31,
-      yesCommits: 22,
-      noCommits: 9,
-      yesPercentage: 70.9,
+      totalCommits: 12,
+      yesCommits: 9,
+      noCommits: 3,
+      yesPercentage: 75.0,
     },
     {
       contributorId: 'contrib-04',
       contributorName: 'Nurul Fadhilah (Contoh)',
       username: 'nurul-f',
-      totalCommits: 18,
-      yesCommits: 12,
-      noCommits: 6,
-      yesPercentage: 66.6,
+      totalCommits: 11,
+      yesCommits: 9,
+      noCommits: 2,
+      yesPercentage: 81.8,
     },
   ],
   timeframe: {
