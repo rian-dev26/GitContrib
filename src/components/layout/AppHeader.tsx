@@ -38,9 +38,10 @@ export function AppHeader() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Generate dynamic breadcrumbs based on active route
+  // Generate dynamic breadcrumbs based on active route — with real names from mock data
   const getBreadcrumbs = (): BreadcrumbItem[] => {
     const path = location.pathname;
+    const parts = path.split('/').filter(Boolean);
 
     if (path === '/dashboard') {
       return [{ label: 'Dashboard' }];
@@ -57,49 +58,10 @@ export function AppHeader() {
         { label: 'Riwayat Analisis' },
       ];
     }
-    if (path.startsWith('/contributors')) {
-      const parts = path.split('/').filter(Boolean);
-      const id = parts[1];
-      if (!id || id === 'demo') {
-        return [
-          { label: 'Dashboard', to: '/dashboard' },
-          { label: 'Contributor' },
-        ];
-      }
-      return [
-        { label: 'Dashboard', to: '/dashboard' },
-        { label: 'Contributor', to: '/contributors/demo' },
-        { label: id },
-      ];
-    }
-    if (path.startsWith('/commits')) {
-      const parts = path.split('/').filter(Boolean);
-      const id = parts[1];
-      if (!id || id === 'demo') {
-        return [
-          { label: 'Dashboard', to: '/dashboard' },
-          { label: 'Detail Commit' },
-        ];
-      }
-      return [
-        { label: 'Dashboard', to: '/dashboard' },
-        { label: 'Detail Commit', to: '/commits/demo' },
-        { label: id.slice(0, 7) },
-      ];
-    }
-    if (path.startsWith('/repositories')) {
-      const parts = path.split('/').filter(Boolean);
-      const repoId = parts[1] || 'repo';
-      return [
-        { label: 'Dashboard', to: '/dashboard' },
-        { label: 'Analisis Repository', to: '/analysis' },
-        { label: repoId },
-      ];
-    }
     if (path.startsWith('/reports')) {
       return [
         { label: 'Dashboard', to: '/dashboard' },
-        { label: 'Laporan' },
+        { label: 'Laporan Data' },
       ];
     }
     if (path.startsWith('/settings')) {
@@ -109,8 +71,90 @@ export function AppHeader() {
       ];
     }
 
+    // /repositories/:id — tampilkan nama repo nyata
+    if (path.startsWith('/repositories') || path.startsWith('/repository')) {
+      const repoId = parts[1];
+      const repoMap: Record<string, string> = {
+        'repo-pbl-01': 'smart-inventory-pbl',
+        'repo-pbl-02': 'attendance-mobile-app',
+        'repo-pbl-03': 'pbl-course-portal',
+      };
+      const repoName = repoId ? (repoMap[repoId] ?? repoId) : 'Repository';
+      return [
+        { label: 'Dashboard', to: '/dashboard' },
+        { label: 'Hasil Analisis', to: '/analysis' },
+        { label: repoName },
+      ];
+    }
+
+    // /contributors/:id — tampilkan nama contributor nyata dengan jalur repo
+    if (path.startsWith('/contributors')) {
+      const id = parts[1];
+      const contribMap: Record<string, { name: string; repoId: string }> = {
+        'contrib-01': { name: 'Dimas Pratama', repoId: 'repo-pbl-01' },
+        'contrib-02': { name: 'Siti Aisyah', repoId: 'repo-pbl-01' },
+        'contrib-03': { name: 'Rian Hidayat', repoId: 'repo-pbl-01' },
+        'contrib-04': { name: 'Nurul Fadhilah', repoId: 'repo-pbl-01' },
+      };
+      const repoMap: Record<string, string> = {
+        'repo-pbl-01': 'smart-inventory-pbl',
+        'repo-pbl-02': 'attendance-mobile-app',
+        'repo-pbl-03': 'pbl-course-portal',
+      };
+      if (!id || id === 'demo') {
+        return [
+          { label: 'Dashboard', to: '/dashboard' },
+          { label: 'Contributor' },
+        ];
+      }
+      const contrib = contribMap[id];
+      const repoId = contrib?.repoId ?? 'repo-pbl-01';
+      const repoName = repoMap[repoId] ?? repoId;
+      return [
+        { label: 'Dashboard', to: '/dashboard' },
+        { label: repoName, to: `/repositories/${repoId}` },
+        { label: contrib?.name ?? id },
+      ];
+    }
+
+    // /commits/:id — tampilkan hash + jalur contributor & repo
+    if (path.startsWith('/commits')) {
+      const id = parts[1];
+      if (!id || id === 'demo') {
+        return [
+          { label: 'Dashboard', to: '/dashboard' },
+          { label: 'Detail Commit' },
+        ];
+      }
+      // Map commit → contributor untuk memperkaya breadcrumb
+      const commitContribMap: Record<string, { contribId: string; contribName: string; repoId: string; repoName: string }> = {
+        'a1b2c3d': { contribId: 'contrib-01', contribName: 'Dimas Pratama', repoId: 'repo-pbl-01', repoName: 'smart-inventory-pbl' },
+        'a2b2c3d': { contribId: 'contrib-01', contribName: 'Dimas Pratama', repoId: 'repo-pbl-01', repoName: 'smart-inventory-pbl' },
+        'b1c3d4e': { contribId: 'contrib-02', contribName: 'Siti Aisyah', repoId: 'repo-pbl-01', repoName: 'smart-inventory-pbl' },
+        'b2c3d4e': { contribId: 'contrib-02', contribName: 'Siti Aisyah', repoId: 'repo-pbl-01', repoName: 'smart-inventory-pbl' },
+        'c1d3d4e': { contribId: 'contrib-03', contribName: 'Rian Hidayat', repoId: 'repo-pbl-01', repoName: 'smart-inventory-pbl' },
+        'd1d3d4e': { contribId: 'contrib-04', contribName: 'Nurul Fadhilah', repoId: 'repo-pbl-01', repoName: 'smart-inventory-pbl' },
+      };
+      const shortId = id.slice(0, 7);
+      const meta = commitContribMap[shortId];
+      if (meta) {
+        return [
+          { label: 'Dashboard', to: '/dashboard' },
+          { label: meta.repoName, to: `/repositories/${meta.repoId}` },
+          { label: meta.contribName, to: `/contributors/${meta.contribId}` },
+          { label: `commit ${shortId}` },
+        ];
+      }
+      return [
+        { label: 'Dashboard', to: '/dashboard' },
+        { label: 'smart-inventory-pbl', to: '/repositories/repo-pbl-01' },
+        { label: `commit ${shortId}` },
+      ];
+    }
+
     return [{ label: 'Dashboard', to: '/dashboard' }, { label: 'Halaman' }];
   };
+
 
   const breadcrumbs = getBreadcrumbs();
 
@@ -141,23 +185,28 @@ export function AppHeader() {
 
           {/* Breadcrumb berdasarkan halaman aktif */}
           <nav aria-label="Breadcrumb" className="min-w-0">
-            <ol className="flex items-center gap-1.5 text-xs text-app-text-secondary truncate">
+            <ol className="flex items-center gap-1 text-[13px] text-app-text-secondary truncate">
               {breadcrumbs.map((crumb, idx) => {
                 const isLast = idx === breadcrumbs.length - 1;
                 return (
-                  <li key={crumb.label} className="flex items-center gap-1.5 truncate">
+                  <li key={`${crumb.label}-${idx}`} className="flex items-center gap-1 truncate">
                     {idx > 0 && (
-                      <ChevronRight className="w-3.5 h-3.5 text-app-text-secondary/50 shrink-0" />
+                      <ChevronRight className="w-3.5 h-3.5 text-app-text-secondary/40 shrink-0" />
                     )}
                     {crumb.to && !isLast ? (
                       <Link
                         to={crumb.to}
-                        className="hover:text-app-text-primary transition-colors truncate"
+                        className="hover:text-app-accent-primary hover:underline underline-offset-2 transition-colors truncate max-w-[140px]"
                       >
                         {crumb.label}
                       </Link>
                     ) : (
-                      <span className={cn('truncate', isLast && 'text-app-text-primary font-medium')}>
+                      <span className={cn(
+                        'truncate max-w-[180px]',
+                        isLast
+                          ? 'text-app-text-primary font-semibold'
+                          : 'text-app-text-secondary'
+                      )}>
                         {crumb.label}
                       </span>
                     )}
