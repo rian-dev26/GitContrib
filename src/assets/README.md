@@ -1,0 +1,1 @@
+# GitContrib Assets Directory
