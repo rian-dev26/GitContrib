@@ -117,6 +117,7 @@ export interface AnalysisHistoryItem {
   id: string;
   repositoryId: string;
   repositoryName: string;
+  repositoryUrl?: string;
   branch: string;
   status: 'COMPLETED' | 'IN_PROGRESS' | 'FAILED';
   startedAt: string;
