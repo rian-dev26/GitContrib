@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Commit } from '../../../types';
 import { cn } from '../../../utils/cn';
+import { StatusBadge } from '../../../components/common/StatusBadge';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -325,11 +326,8 @@ export function ReportCommitTable({ commits, totalRepoCommits }: ReportCommitTab
                 </td>
               </tr>
             ) : (
-              paginated.map((commit, idx) => {
-                const isYes = commit.classification?.label === 'YES';
-
-                return (
-                  <tr
+              paginated.map((commit, idx) => (
+                <tr
                     key={commit.id}
                     className={cn(
                       'hover:bg-app-accent-primary/[0.04] transition-colors',
@@ -390,28 +388,13 @@ export function ReportCommitTable({ commits, totalRepoCommits }: ReportCommitTab
                     {/* 9. Prediksi YES/NO */}
                     <td className="py-2.5 px-3 pr-4 text-center whitespace-nowrap">
                       {commit.classification ? (
-                        <span
-                          className={cn(
-                            'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border',
-                            isYes
-                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25'
-                              : 'bg-rose-500/10 text-rose-400 border-rose-500/25'
-                          )}
-                        >
-                          {isYes ? (
-                            <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
-                          ) : (
-                            <XCircle className="w-3 h-3 text-rose-400 shrink-0" />
-                          )}
-                          {commit.classification.label}
-                        </span>
+                        <StatusBadge status={commit.classification.label} />
                       ) : (
                         <span className="text-app-text-secondary/60 text-[11px]">—</span>
                       )}
                     </td>
                   </tr>
-                );
-              })
+                ))
             )}
           </tbody>
         </table>

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Commit } from '../../../types';
 import { cn } from '../../../utils/cn';
+import { StatusBadge } from '../../../components/common/StatusBadge';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -304,24 +305,24 @@ export function CommitTable({ commits, repositoryId }: CommitTableProps) {
         </div>
 
         {/* Row 3: Result Stats */}
-        <div className="flex flex-wrap items-center gap-3 text-xs text-app-text-secondary">
+        <div className="flex flex-wrap items-center gap-2.5 text-xs text-app-text-secondary">
           <span>
-            Menampilkan <strong className="text-app-text-primary">{filtered.length}</strong> dari {commits.length} commit
+            Menampilkan <strong className="text-app-text-primary font-semibold">{filtered.length}</strong> dari {commits.length} commit
           </span>
-          <span>•</span>
-          <span className="flex items-center gap-1">
-            <CheckCircle2 className="w-3.5 h-3.5 text-app-accent-positive" />
-            <strong className="text-app-accent-positive">{yesCount} YES</strong>
+          <span className="text-app-border">•</span>
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">
+            <CheckCircle2 className="w-3 h-3" />
+            {yesCount} YES
           </span>
-          <span>•</span>
-          <span className="flex items-center gap-1">
-            <XCircle className="w-3.5 h-3.5 text-app-accent-negative" />
-            <strong className="text-app-accent-negative">{noCount} NO</strong>
+          <span className="text-app-border">•</span>
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/25">
+            <XCircle className="w-3 h-3" />
+            {noCount} NO
           </span>
           {isFiltered && (
             <>
-              <span>•</span>
-              <span className="text-app-accent-primary italic">Filter aktif</span>
+              <span className="text-app-border">•</span>
+              <span className="text-app-accent-primary text-[11px] italic">Filter aktif</span>
             </>
           )}
         </div>
@@ -390,38 +391,26 @@ export function CommitTable({ commits, repositoryId }: CommitTableProps) {
                   </td>
 
                   {/* Lines Added */}
-                  <td className="py-2.5 px-3 text-right font-mono text-app-accent-positive font-semibold">
+                  <td className="py-2.5 px-3 text-right font-mono text-emerald-500 dark:text-emerald-400 font-medium">
                     +{commit.stats.additions}
                   </td>
 
                   {/* Lines Deleted */}
-                  <td className="py-2.5 px-3 text-right font-mono text-app-accent-negative font-semibold">
+                  <td className="py-2.5 px-3 text-right font-mono text-rose-500 dark:text-rose-400 font-medium">
                     -{commit.stats.deletions}
                   </td>
 
                   {/* Total Changes */}
-                  <td className="py-2.5 px-3 text-right font-mono text-app-text-primary">
+                  <td className="py-2.5 px-3 text-right font-mono text-app-text-primary font-medium">
                     {commit.stats.totalChanges}
                   </td>
 
                   {/* Prediction Badge */}
-                  <td className="py-2.5 px-3 text-center">
+                  <td className="py-2.5 px-3 text-center whitespace-nowrap">
                     {commit.classification ? (
-                      <span
-                        className={cn(
-                          'inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-bold',
-                          commit.classification.label === 'YES'
-                            ? 'bg-app-accent-positive/15 text-app-accent-positive border-app-accent-positive/30'
-                            : 'bg-app-accent-negative/15 text-app-accent-negative border-app-accent-negative/30'
-                        )}
-                      >
-                        {commit.classification.label === 'YES'
-                          ? <CheckCircle2 className="w-3 h-3" />
-                          : <XCircle className="w-3 h-3" />}
-                        {commit.classification.label}
-                      </span>
+                      <StatusBadge status={commit.classification.label} />
                     ) : (
-                      <span className="text-app-text-secondary italic text-[10px]">—</span>
+                      <span className="text-app-text-secondary/60 text-[11px]">—</span>
                     )}
                   </td>
 

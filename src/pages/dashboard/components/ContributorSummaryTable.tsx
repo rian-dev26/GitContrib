@@ -105,19 +105,19 @@ export function ContributorSummaryTable({ contributors }: ContributorSummaryTabl
                     {c.activeDays} hari
                   </td>
 
-                  <td className="py-3 px-3 text-right font-mono text-app-accent-positive">
+                  <td className="py-3 px-3 text-right font-mono text-emerald-500 dark:text-emerald-400 font-medium">
                     +{c.linesAdded.toLocaleString('id-ID')}
                   </td>
 
-                  <td className="py-3 px-3 text-right font-mono text-app-accent-negative">
+                  <td className="py-3 px-3 text-right font-mono text-rose-500 dark:text-rose-400 font-medium">
                     -{c.linesDeleted.toLocaleString('id-ID')}
                   </td>
 
-                  <td className="py-3 px-3 text-center font-mono font-semibold text-app-accent-positive">
+                  <td className="py-3 px-3 text-center font-mono font-semibold text-emerald-500 dark:text-emerald-400">
                     {c.yesCount}
                   </td>
 
-                  <td className="py-3 px-3 text-center font-mono font-semibold text-app-accent-negative">
+                  <td className="py-3 px-3 text-center font-mono font-semibold text-rose-500 dark:text-rose-400">
                     {c.noCount}
                   </td>
 

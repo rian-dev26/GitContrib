@@ -105,7 +105,7 @@ export function LoginPage() {
       {/* Card */}
       <div className="bg-app-card border border-app-border rounded-2xl shadow-xl overflow-hidden">
         {/* Top accent strip */}
-        <div className="h-1 w-full bg-gradient-to-r from-app-accent-primary via-indigo-400 to-app-accent-secondary" />
+        <div className="h-1 w-full bg-app-accent-primary" />
 
         <div className="p-7 sm:p-8 space-y-6">
           {/* Header */}
@@ -124,13 +124,13 @@ export function LoginPage() {
           </div>
 
           {/* Prototype Notice */}
-          <div className="p-3.5 rounded-xl bg-indigo-500/10 border border-indigo-500/25 flex items-start gap-2.5">
-            <Info className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
-            <div className="text-[11px] text-indigo-300 leading-relaxed space-y-1">
-              <p className="font-semibold text-indigo-200">Mode Simulasi Frontend</p>
+          <div className="p-3.5 rounded-xl bg-app-accent-primary/10 border border-app-accent-primary/25 flex items-start gap-2.5">
+            <Info className="w-4 h-4 text-app-accent-primary shrink-0 mt-0.5" />
+            <div className="text-[11px] text-app-text-secondary leading-relaxed space-y-1">
+              <p className="font-semibold text-app-text-primary">Mode Simulasi Frontend</p>
               <p>
                 Gunakan email{' '}
-                <code className="font-mono bg-indigo-500/20 px-1 rounded">
+                <code className="font-mono bg-app-accent-primary/20 text-app-accent-primary px-1 rounded">
                   dosen.pbl@polibatam.ac.id
                 </code>{' '}
                 dengan kata sandi apa saja (min. 6 karakter).

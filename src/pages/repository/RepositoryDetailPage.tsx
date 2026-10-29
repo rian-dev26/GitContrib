@@ -214,18 +214,17 @@ export function RepositoryDetailPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="py-3 px-4 font-mono text-right">{c.metrics.totalCommits}</td>
-                    <td className="py-3 px-4 font-mono text-right text-app-accent-positive font-semibold">
+                    <td className="py-3 px-4 font-mono text-right text-emerald-500 dark:text-emerald-400 font-semibold">
                       {c.metrics.classifiedYesCount}
                     </td>
-                    <td className="py-3 px-4 font-mono text-right text-app-accent-negative font-semibold">
+                    <td className="py-3 px-4 font-mono text-right text-rose-500 dark:text-rose-400 font-semibold">
                       {c.metrics.classifiedNoCount}
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
                         <div className="w-20 h-1.5 rounded-full bg-app-secondary overflow-hidden">
                           <div
-                            className="h-full bg-app-accent-positive rounded-full"
+                            className="h-full bg-emerald-500 rounded-full"
                             style={{ width: `${Math.round(c.metrics.yesRatio * 100)}%` }}
                           />
                         </div>

@@ -23,11 +23,7 @@ export function AuthLayout() {
   return (
     <div className="min-h-screen bg-app-bg text-app-text-primary flex items-stretch">
       {/* ── Left Panel — Branding (hidden on small screens) ─────────────────── */}
-      <div className="hidden lg:flex flex-col justify-between w-[420px] shrink-0 bg-app-sidebar border-r border-app-border p-10 relative overflow-hidden">
-        {/* Decorative gradient blobs */}
-        <div className="absolute -top-32 -left-32 w-80 h-80 bg-app-accent-primary/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
-
+      <div className="hidden lg:flex flex-col justify-between w-[560px] shrink-0 bg-app-sidebar border-r border-app-border p-10 pl-14 relative">
         {/* Brand */}
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-10">

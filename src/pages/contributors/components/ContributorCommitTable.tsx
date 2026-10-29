@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Commit } from '../../../types';
 import { cn } from '../../../utils/cn';
+import { StatusBadge } from '../../../components/common/StatusBadge';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -472,26 +473,7 @@ export function ContributorCommitTable({
 
                     {/* Prediksi YES/NO */}
                     <td className="py-2.5 px-3 whitespace-nowrap text-center">
-                      <span
-                        className={cn(
-                          'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border shadow-xs',
-                          isYes
-                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
-                            : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30'
-                        )}
-                      >
-                        {isYes ? (
-                          <>
-                            <CheckCircle2 className="w-3 h-3 stroke-[2.5]" />
-                            YES
-                          </>
-                        ) : (
-                          <>
-                            <XCircle className="w-3 h-3 stroke-[2.5]" />
-                            NO
-                          </>
-                        )}
-                      </span>
+                      <StatusBadge status={c.classification?.label || (isYes ? 'YES' : 'NO')} />
                     </td>
 
                     {/* Action */}
