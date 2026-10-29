@@ -1,24 +1,27 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   FolderGit2,
   GitCommit,
   Users,
   ExternalLink,
-  Calendar,
   User,
   ArrowRight,
+  CheckCircle2,
+  XCircle,
+  Info,
+  Calendar,
 } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { MetricCard } from '../../components/common/MetricCard';
-import { StatusBadge } from '../../components/common/StatusBadge';
-import { Card, CardHeader, CardTitle } from '../../components/ui/Card';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { LoadingIndicator } from '../../components/ui/LoadingIndicator';
 import { ErrorState } from '../../components/ui/ErrorState';
 import { repositoryService } from '../../services/repositoryService';
 import { analysisService } from '../../services/analysisService';
 import { Repository, Contributor, Commit } from '../../types';
+import { CommitTable } from './components/CommitTable';
 
 export function RepositoryDetailPage() {
   const { repositoryId = 'repo-pbl-01' } = useParams();
@@ -56,6 +59,28 @@ export function RepositoryDetailPage() {
     loadData();
   }, [repositoryId]);
 
+  // ─── Ringkasan total keseluruhan ─────────────────────────────────────────
+  const totalYes = useMemo(
+    () => commits.filter((c) => c.classification?.label === 'YES').length,
+    [commits]
+  );
+  const totalNo = useMemo(
+    () => commits.filter((c) => c.classification?.label === 'NO').length,
+    [commits]
+  );
+
+  // ─── Tanggal rentang analisis dari commit ─────────────────────────────────
+  const dateRange = useMemo(() => {
+    if (!commits.length) return null;
+    const timestamps = commits.map((c) => new Date(c.timestamp).getTime());
+    const from = new Date(Math.min(...timestamps));
+    const to = new Date(Math.max(...timestamps));
+    return {
+      from: from.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+      to: to.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+    };
+  }, [commits]);
+
   if (isLoading) {
     return <LoadingIndicator text="Memuat data analisis repository..." fullScreen={false} className="py-24" />;
   }
@@ -66,6 +91,7 @@ export function RepositoryDetailPage() {
 
   return (
     <div className="space-y-6">
+      {/* ─── Header ─────────────────────────────────────────── */}
       <PageHeader
         title={repo.name}
         description={repo.description || `Analisis histori Git untuk repository ${repo.fullName}`}
@@ -88,156 +114,152 @@ export function RepositoryDetailPage() {
         }
       />
 
-      {/* Metrics Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* ─── Ringkasan Global (Card Stat) ───────────────────── */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <MetricCard
-          label="Total Mahasiswa Terdeteksi"
-          value={contributors.length}
-          subValue="Kontributor aktif repository"
-          icon={<Users className="w-4 h-4 text-app-accent-secondary" />}
-        />
-        <MetricCard
-          label="Total Commit Tercatat"
-          value={repo.stats?.totalCommits ?? commits.length}
-          subValue="Histori Git teranalisis"
+          label="Total Commit"
+          value={commits.length}
+          subValue="Commit teranalisis"
           icon={<GitCommit className="w-4 h-4 text-app-accent-primary" />}
         />
         <MetricCard
-          label="Status Model ML"
-          value="Supervised v0.1"
-          subValue="YES/NO commit level classifier"
-          icon={<Badge variant="success" size="sm">Active</Badge>}
+          label="Kontributor"
+          value={contributors.length}
+          subValue="Mahasiswa aktif"
+          icon={<Users className="w-4 h-4 text-app-accent-secondary" />}
+        />
+        <MetricCard
+          label="Klasifikasi YES"
+          value={totalYes}
+          subValue={`${commits.length ? Math.round((totalYes / commits.length) * 100) : 0}% dari total`}
+          icon={<CheckCircle2 className="w-4 h-4 text-app-accent-positive" />}
+        />
+        <MetricCard
+          label="Klasifikasi NO"
+          value={totalNo}
+          subValue={`${commits.length ? Math.round((totalNo / commits.length) * 100) : 0}% dari total`}
+          icon={<XCircle className="w-4 h-4 text-app-accent-negative" />}
         />
       </div>
 
-      {/* Contributors Summary Table */}
+      {/* ─── Info Rentang Waktu Analisis ────────────────────── */}
+      {dateRange && (
+        <div className="flex items-center gap-2 p-2.5 px-4 rounded-md bg-app-secondary/50 border border-app-border text-xs text-app-text-secondary">
+          <Calendar className="w-3.5 h-3.5 text-app-accent-primary shrink-0" />
+          <span>
+            Rentang commit repository:{' '}
+            <strong className="text-app-text-primary">{dateRange.from}</strong>
+            {' '}&ndash;{' '}
+            <strong className="text-app-text-primary">{dateRange.to}</strong>
+          </span>
+          <span className="ml-auto flex items-center gap-1 italic text-app-text-secondary/70 text-[11px]">
+            <Info className="w-3 h-3" />
+            Data simulasi prototype
+          </span>
+        </div>
+      )}
+
+      {/* ─── Tabel Commit Lengkap ────────────────────────────── */}
       <Card>
         <CardHeader>
-          <CardTitle>Daftar Kontributor Mahasiswa (PBL)</CardTitle>
-          <span className="text-xs text-app-text-secondary">
-            Ringkasan kontribusi dan rasio klasifikasi commit YES
-          </span>
+          <div>
+            <CardTitle>Histori Commit & Hasil Klasifikasi Model</CardTitle>
+            <CardDescription>
+              Seluruh commit dianalisis pada tingkat individual. Gunakan filter, pencarian, dan sorting untuk eksplorasi data.
+            </CardDescription>
+          </div>
+          <Badge variant="outline" size="sm" className="bg-app-accent-primary/10 border-app-accent-primary/30 text-app-accent-primary shrink-0">
+            {commits.length} Commit
+          </Badge>
         </CardHeader>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-app-secondary/50 text-app-text-secondary border-b border-app-border font-medium">
-              <tr>
-                <th className="py-3 px-4">Nama & Username</th>
-                <th className="py-3 px-4">Total Commit</th>
-                <th className="py-3 px-4">Klasifikasi YES</th>
-                <th className="py-3 px-4">Klasifikasi NO</th>
-                <th className="py-3 px-4">Rasio YES</th>
-                <th className="py-3 px-4 text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-app-border">
-              {contributors.map((c) => (
-                <tr key={c.id} className="hover:bg-app-secondary/30 transition-colors">
-                  <td className="py-3 px-4 font-medium text-app-text-primary">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-app-secondary flex items-center justify-center text-app-text-secondary border border-app-border">
-                        <User className="w-3.5 h-3.5" />
-                      </div>
-                      <div>
-                        <div>{c.name}</div>
-                        <div className="text-[11px] text-app-text-secondary">@{c.username}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4 font-mono">{c.metrics.totalCommits}</td>
-                  <td className="py-3 px-4 font-mono text-app-accent-positive">
-                    {c.metrics.classifiedYesCount}
-                  </td>
-                  <td className="py-3 px-4 font-mono text-app-accent-negative">
-                    {c.metrics.classifiedNoCount}
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 h-1.5 rounded-full bg-app-secondary overflow-hidden">
-                        <div
-                          className="h-full bg-app-accent-positive rounded-full"
-                          style={{ width: `${Math.round(c.metrics.yesRatio * 100)}%` }}
-                        />
-                      </div>
-                      <span className="font-mono text-[11px]">
-                        {Math.round(c.metrics.yesRatio * 100)}%
-                      </span>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    <Link
-                      to={`/contributors/${c.id}`}
-                      className="inline-flex items-center gap-1 text-app-accent-primary hover:underline font-medium"
-                    >
-                      Detail <ArrowRight className="w-3 h-3" />
-                    </Link>
-                  </td>
+        <CardContent>
+          <CommitTable commits={commits} repositoryId={repositoryId} />
+        </CardContent>
+      </Card>
+
+      {/* ─── Tabel Kontributor ─────────────────────────────────── */}
+      <Card>
+        <CardHeader>
+          <div>
+            <CardTitle>Ringkasan per Kontributor Mahasiswa</CardTitle>
+            <CardDescription>
+              Agregasi klasifikasi commit berdasarkan identitas mahasiswa PBL.
+            </CardDescription>
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-app-secondary/50 text-app-text-secondary border-b border-app-border font-medium">
+                <tr>
+                  <th className="py-3 px-4">Nama &amp; Username</th>
+                  <th className="py-3 px-4 text-right">Total Commit</th>
+                  <th className="py-3 px-4 text-right">Klasifikasi YES</th>
+                  <th className="py-3 px-4 text-right">Klasifikasi NO</th>
+                  <th className="py-3 px-4">Rasio YES</th>
+                  <th className="py-3 px-4 text-right">Aksi</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-app-border">
+                {contributors.map((c) => (
+                  <tr key={c.id} className="hover:bg-app-secondary/30 transition-colors">
+                    <td className="py-3 px-4 font-medium text-app-text-primary">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full bg-app-secondary flex items-center justify-center text-app-text-secondary border border-app-border shrink-0">
+                          <User className="w-3.5 h-3.5" />
+                        </div>
+                        <div>
+                          <div>{c.name.replace(' (Contoh)', '')}</div>
+                          <div className="text-[11px] text-app-text-secondary">@{c.username}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 font-mono text-right">{c.metrics.totalCommits}</td>
+                    <td className="py-3 px-4 font-mono text-right text-app-accent-positive font-semibold">
+                      {c.metrics.classifiedYesCount}
+                    </td>
+                    <td className="py-3 px-4 font-mono text-right text-app-accent-negative font-semibold">
+                      {c.metrics.classifiedNoCount}
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-20 h-1.5 rounded-full bg-app-secondary overflow-hidden">
+                          <div
+                            className="h-full bg-app-accent-positive rounded-full"
+                            style={{ width: `${Math.round(c.metrics.yesRatio * 100)}%` }}
+                          />
+                        </div>
+                        <span className="font-mono text-[11px] text-app-text-primary">
+                          {Math.round(c.metrics.yesRatio * 100)}%
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <Link
+                        to={`/contributors/${c.id}`}
+                        className="inline-flex items-center gap-1 text-app-accent-primary hover:underline font-medium"
+                      >
+                        Detail <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
       </Card>
 
-      {/* Commits List Preview */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Histori Commit & Hasil Klasifikasi Model</CardTitle>
-          <span className="text-xs text-app-text-secondary">
-            Tingkat commit individual dengan status prediksi YES/NO
-          </span>
-        </CardHeader>
-        <div className="divide-y divide-app-border">
-          {commits.map((commit) => (
-            <div
-              key={commit.id}
-              className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-app-secondary/20 transition-colors"
-            >
-              <div className="space-y-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs text-app-accent-primary bg-app-accent-primary/10 px-1.5 py-0.5 rounded border border-app-accent-primary/20">
-                    {commit.shortSha}
-                  </span>
-                  <span className="text-xs font-medium text-app-text-primary truncate">
-                    {commit.message}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 text-[11px] text-app-text-secondary">
-                  <span>Oleh: {commit.contributorName}</span>
-                  <span>•</span>
-                  <span className="inline-flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
-                    {new Date(commit.timestamp).toLocaleDateString('id-ID', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                    })}
-                  </span>
-                  <span>•</span>
-                  <span className="font-mono text-app-accent-positive">+{commit.stats.additions}</span>
-                  <span className="font-mono text-app-accent-negative">-{commit.stats.deletions}</span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 shrink-0">
-                {commit.classification && (
-                  <StatusBadge
-                    status={commit.classification.label}
-                    confidence={commit.classification.confidence}
-                    showConfidence
-                  />
-                )}
-                <Link
-                  to={`/commits/${commit.id}`}
-                  className="text-xs text-app-text-secondary hover:text-app-text-primary px-2.5 py-1 rounded bg-app-secondary border border-app-border"
-                >
-                  Inspeksi
-                </Link>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
+      {/* ─── Ethical Notice ──────────────────────────────────── */}
+      <div className="flex items-start gap-2.5 p-3.5 rounded-md border border-app-accent-secondary/30 bg-app-accent-secondary/5 text-xs text-app-text-secondary">
+        <Info className="w-4 h-4 text-app-accent-secondary shrink-0 mt-0.5" />
+        <span>
+          <strong className="text-app-text-primary">Catatan Etis:</strong>{' '}
+          Hasil klasifikasi YES/NO merupakan indikasi estimasi pola kontribusi commit berbasis model prototype.
+          Hasil ini bukan representasi tunggal dari dedikasi atau nilai akademik mahasiswa dan tidak boleh
+          digunakan sebagai satu-satunya dasar penilaian.
+        </span>
+      </div>
     </div>
   );
 }
