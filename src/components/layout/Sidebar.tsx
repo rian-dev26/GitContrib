@@ -13,6 +13,7 @@ import {
   Settings,
 } from 'lucide-react';
 import { useLayout } from '../../contexts/LayoutContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { cn } from '../../utils/cn';
 
 interface NavItem {
@@ -56,7 +57,13 @@ const navItems: NavItem[] = [
 
 export function Sidebar() {
   const { isCollapsed, toggleCollapsed, isMobileOpen, closeMobileDrawer } = useLayout();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
 
   return (
     <>
@@ -200,21 +207,21 @@ export function Sidebar() {
               isCollapsed && !isMobileOpen ? 'p-1.5 justify-center' : 'p-2.5 gap-3'
             )}
           >
-            {/* Avatar Inisial DA */}
+            {/* Avatar Inisial */}
             <div
               className="w-8 h-8 rounded-full bg-app-accent-primary/20 border border-app-accent-primary/40 flex items-center justify-center text-xs font-semibold text-app-accent-primary shrink-0"
-              title="Dosen Akademik"
+              title={user?.name ?? 'Dosen Akademik'}
             >
-              DA
+              {user?.avatarInitials ?? 'DA'}
             </div>
 
             {(!isCollapsed || isMobileOpen) && (
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-app-text-primary truncate">
-                  Dosen Akademik
+                  {user?.name ?? 'Dosen Akademik'}
                 </p>
                 <span className="inline-block px-1.5 py-0.2 rounded text-[10px] bg-app-secondary text-app-text-secondary border border-app-border mt-0.5">
-                  Dosen
+                  {user?.role ?? 'Dosen'}
                 </span>
               </div>
             )}
@@ -232,9 +239,9 @@ export function Sidebar() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => navigate('/login')}
-                  aria-label="Keluar ke halaman login"
-                  className="p-1 rounded text-app-text-secondary hover:text-app-accent-negative hover:bg-app-secondary transition-colors"
+                  onClick={handleLogout}
+                  aria-label="Keluar dari GitContrib"
+                  className="p-1 rounded text-app-text-secondary hover:text-rose-500 hover:bg-app-secondary transition-colors"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                 </button>

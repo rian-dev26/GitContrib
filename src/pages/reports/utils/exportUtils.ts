@@ -1,4 +1,4 @@
-import { Commit, Contributor, Repository } from '../../../types';
+import { Commit, Repository } from '../../../types';
 
 /**
  * Utility untuk membuat dan mengunduh file CSV dari data commit
@@ -6,7 +6,7 @@ import { Commit, Contributor, Repository } from '../../../types';
 export function exportCommitsToCSV(
   commits: Commit[],
   repository: Repository | null,
-  periodLabel: string
+  _periodLabel: string
 ): boolean {
   try {
     if (!commits || commits.length === 0) {

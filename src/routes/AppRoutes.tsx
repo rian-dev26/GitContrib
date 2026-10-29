@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AppLayout } from '../layouts/AppLayout';
 import { AuthLayout } from '../layouts/AuthLayout';
+import { ProtectedRoute } from '../components/auth/ProtectedRoute';
 
 import { DashboardPage } from '../pages/dashboard/DashboardPage';
 import { AnalysisPage } from '../pages/analysis/AnalysisPage';
@@ -13,19 +14,32 @@ import { SettingsPage } from '../pages/settings/SettingsPage';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { NotFoundPage } from '../pages/not-found/NotFoundPage';
 
+/**
+ * Membungkus AppLayout dengan ProtectedRoute sehingga:
+ *  - Pengguna yang belum login diarahkan ke /login
+ *  - Pengguna yang sudah login mendapatkan AppLayout dengan Outlet
+ */
+function ProtectedAppLayout() {
+  return (
+    <ProtectedRoute>
+      <AppLayout />
+    </ProtectedRoute>
+  );
+}
+
 export function AppRoutes() {
   return (
     <Routes>
-      {/* Route root mengarahkan sementara ke /dashboard */}
+      {/* Root — arahkan ke /dashboard (ProtectedRoute akan handle jika belum login) */}
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-      {/* Auth Route */}
+      {/* ─── Auth Routes (tanpa sidebar) ─────────────────────────────────────── */}
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<LoginPage />} />
       </Route>
 
-      {/* Main Application Routes */}
-      <Route element={<AppLayout />}>
+      {/* ─── Protected Application Routes ────────────────────────────────────── */}
+      <Route element={<ProtectedAppLayout />}>
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/analysis" element={<AnalysisPage />} />
         <Route path="/repositories/:repositoryId" element={<RepositoryDetailPage />} />

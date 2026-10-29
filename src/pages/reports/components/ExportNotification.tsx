@@ -1,4 +1,4 @@
-import { CheckCircle2, AlertTriangle, X, FileSpreadsheet, Printer } from 'lucide-react';
+import { AlertTriangle, X, FileSpreadsheet, Printer } from 'lucide-react';
 import { cn } from '../../../utils/cn';
 
 export interface NotificationState {
