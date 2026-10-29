@@ -8,6 +8,7 @@ import { AnalysisPage } from '../pages/analysis/AnalysisPage';
 import { RepositoryDetailPage } from '../pages/repository/RepositoryDetailPage';
 import { ContributorDetailPage } from '../pages/contributors/ContributorDetailPage';
 import { CommitDetailPage } from '../pages/commits/CommitDetailPage';
+import { CommitsListPage } from '../pages/commits/CommitsListPage';
 import { HistoryPage } from '../pages/history/HistoryPage';
 import { ReportsPage } from '../pages/reports/ReportsPage';
 import { SettingsPage } from '../pages/settings/SettingsPage';
@@ -53,8 +54,8 @@ export function AppRoutes() {
         <Route path="/contributors" element={<Navigate to="/contributors/contrib-01" replace />} />
         <Route path="/contributors/:contributorId" element={<ContributorDetailPage />} />
 
-        {/* Commits & alias */}
-        <Route path="/commits" element={<Navigate to="/commits/a1b2c3d" replace />} />
+        {/* Commits */}
+        <Route path="/commits" element={<CommitsListPage />} />
         <Route path="/commits/:commitId" element={<CommitDetailPage />} />
 
         <Route path="/history" element={<HistoryPage />} />

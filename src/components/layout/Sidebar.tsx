@@ -47,7 +47,7 @@ const navItems: NavItem[] = [
   },
   {
     label: 'Detail Commit',
-    to: '/commits/a1b2c3d',
+    to: '/commits',
     icon: GitCommitHorizontal,
   },
   {
