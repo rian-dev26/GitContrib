@@ -41,7 +41,7 @@ const navItems: NavItem[] = [
   },
   {
     label: 'Contributor',
-    to: '/contributors/contrib-01',
+    to: '/contributors',
     icon: Users,
   },
   {
@@ -142,7 +142,9 @@ export function Sidebar() {
             const rootSegment = item.to.split('/')[1];
             const isSectionActive =
               location.pathname === item.to ||
-              (rootSegment !== 'dashboard' && location.pathname.startsWith(`/${rootSegment}`));
+              (rootSegment !== 'dashboard' && location.pathname.startsWith(`/${rootSegment}`)) ||
+              (rootSegment === 'contributors' && location.pathname.startsWith('/contributor')) ||
+              (rootSegment === 'repositories' && location.pathname.startsWith('/repository'));
 
             return (
               <NavLink

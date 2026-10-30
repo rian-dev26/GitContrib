@@ -35,9 +35,12 @@ export const analysisService = {
   /**
    * Mengambil daftar contributor beserta ringkasan metrik commit
    */
-  async getContributors(repositoryId: string): Promise<Contributor[]> {
+  async getContributors(repositoryId?: string): Promise<Contributor[]> {
     await new Promise((resolve) => setTimeout(resolve, 200));
-    return MOCK_CONTRIBUTORS.filter((c) => c.repositoryId === repositoryId || true);
+    if (!repositoryId || repositoryId === 'all' || repositoryId === 'ALL') {
+      return [...MOCK_CONTRIBUTORS];
+    }
+    return MOCK_CONTRIBUTORS.filter((c) => c.repositoryId === repositoryId);
   },
 
   /**

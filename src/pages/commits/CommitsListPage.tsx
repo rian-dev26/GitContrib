@@ -241,6 +241,11 @@ export function CommitsListPage() {
   const isDateFiltered = datePreset !== 'all';
   const timeframeLabel = buildTimeframeLabel(datePreset, dateFrom, dateTo);
 
+  const totalAdditions = useMemo(() => sorted.reduce((acc, c) => acc + c.stats.additions, 0), [sorted]);
+  const totalDeletions = useMemo(() => sorted.reduce((acc, c) => acc + c.stats.deletions, 0), [sorted]);
+  const totalFilesChanged = useMemo(() => sorted.reduce((acc, c) => acc + c.stats.filesChanged, 0), [sorted]);
+  const totalChurn = totalAdditions + totalDeletions;
+
   // ─── Handlers ──────────────────────────────────────────────────────────────
   const handleSort = useCallback((key: SortKey) => {
     setSort((prev) => {
@@ -334,17 +339,18 @@ export function CommitsListPage() {
 
   return (
     <div className="space-y-5 animate-fadeIn pb-12">
-
-      {/* ─── Header ──────────────────────────────────────────────────────────── */}
-      <div className="print:hidden">
-        <h1 className="text-xl font-bold text-app-text-primary flex items-center gap-2">
-          <GitCommit className="w-5 h-5 text-app-accent-primary" />
-          Data Kontribusi Commit
-        </h1>
-        <p className="text-xs text-app-text-secondary mt-1">
-          Tabel seluruh data commit untuk keperluan analisis dan evaluasi kontribusi tim PBL.
-        </p>
-      </div>
+      {/* ─── SCREEN VIEW (Hidden when printing to PDF) ─────────────────────── */}
+      <div className="space-y-5 print:hidden">
+        {/* Header */}
+        <div>
+          <h1 className="text-xl font-bold text-app-text-primary flex items-center gap-2">
+            <GitCommit className="w-5 h-5 text-app-accent-primary" />
+            Data Kontribusi Commit
+          </h1>
+          <p className="text-xs text-app-text-secondary mt-1">
+            Tabel seluruh data commit untuk keperluan analisis dan evaluasi kontribusi tim PBL.
+          </p>
+        </div>
 
       {/* ─── Toast Notification ──────────────────────────────────────────────── */}
       {notification && (
@@ -698,13 +704,158 @@ export function CommitsListPage() {
           )}
         </div>
       </div>
+      </div>
 
-      {/* ─── Print-only header ───────────────────────────────────────────────── */}
-      <div className="hidden print:block fixed top-0 left-0 right-0 p-4 bg-white border-b border-gray-300 text-black">
-        <h1 className="text-base font-bold">Data Kontribusi Repository — GitContrib</h1>
-        <p className="text-[10px] text-gray-600 mt-0.5">
-          {selectedRepo?.fullName} ({selectedRepo?.defaultBranch}) • Periode: {timeframeLabel} • Dicetak: {printedDate} • {sorted.length} commit
-        </p>
+      {/* ─── PRINTABLE REPORT (Shown strictly when printing / saving to PDF) ─── */}
+      <div id="printable-report" className="hidden print:block p-8 bg-white text-slate-900 space-y-6">
+        {/* Kop Dokumen Laporan Resmi */}
+        <div className="border-b-2 border-slate-900 pb-4">
+          <div className="flex justify-between items-start">
+            <div>
+              <div className="inline-block px-2.5 py-0.5 mb-1.5 text-[9px] font-bold uppercase tracking-wider bg-slate-900 text-white rounded">
+                GitContrib • Dokumen Laporan Resmi
+              </div>
+              <h1 className="text-xl font-bold text-slate-900">
+                Laporan Data Kontribusi & Klasifikasi Commit Repository
+              </h1>
+              <p className="text-xs text-slate-600 mt-0.5">
+                Sistem Analisis Pola Kontribusi Repository GitHub Berbasis Machine Learning
+              </p>
+            </div>
+            <div className="text-right text-[10px] text-slate-500 space-y-0.5">
+              <p>Dokumen: <strong>LAP-GITCONTRIB-DATA</strong></p>
+              <p>Tanggal Cetak: <strong>{printedDate}</strong></p>
+              <p>Total Baris: <strong>{sorted.length} Commit</strong></p>
+            </div>
+          </div>
+
+          {/* Kotak Metadata Laporan */}
+          <div className="mt-4 pt-3 border-t border-slate-200 grid grid-cols-4 gap-3 text-[10px]">
+            <div>
+              <span className="text-slate-500 block">Repository:</span>
+              <span className="font-semibold text-slate-800">{selectedRepo?.fullName}</span>
+            </div>
+            <div>
+              <span className="text-slate-500 block">Branch Default:</span>
+              <span className="font-mono font-medium text-slate-800">{selectedRepo?.defaultBranch}</span>
+            </div>
+            <div>
+              <span className="text-slate-500 block">Periode Data:</span>
+              <span className="font-medium text-slate-800">{timeframeLabel}</span>
+            </div>
+            <div>
+              <span className="text-slate-500 block">Filter Kontributor:</span>
+              <span className="font-medium text-slate-800">
+                {filterContributor === 'ALL' ? 'Semua Kontributor' : filterContributor}
+              </span>
+            </div>
+          </div>
+
+          {/* Ringkasan Statistik Cetak */}
+          <div className="mt-3 p-2.5 bg-slate-100 rounded border border-slate-300 flex items-center justify-between text-[10px]">
+            <div className="flex items-center gap-6">
+              <div>Total Commit: <strong className="text-slate-900">{sorted.length}</strong></div>
+              <div>
+                Valid (YES):{' '}
+                <strong className="text-emerald-700">
+                  {yesCount} ({sorted.length ? Math.round((yesCount / sorted.length) * 100) : 0}%)
+                </strong>
+              </div>
+              <div>
+                Non-Signifikan (NO):{' '}
+                <strong className="text-rose-700">
+                  {noCount} ({sorted.length ? Math.round((noCount / sorted.length) * 100) : 0}%)
+                </strong>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 text-slate-700">
+              <div>File Berubah: <strong className="text-slate-900">{totalFilesChanged}</strong></div>
+              <div>+Lines: <strong className="text-emerald-700">+{totalAdditions.toLocaleString('id-ID')}</strong></div>
+              <div>-Lines: <strong className="text-rose-700">-{totalDeletions.toLocaleString('id-ID')}</strong></div>
+              <div>Total Churn: <strong className="text-slate-900">{totalChurn.toLocaleString('id-ID')}</strong></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Tabel Cetak Lengkap (Menampilkan SEMUA commit hasil filter, tidak terpotong pagination) */}
+        <table className="w-full text-[9px] border-collapse border border-slate-300">
+          <thead>
+            <tr className="bg-slate-100 text-slate-900 border-b border-slate-400 font-bold uppercase tracking-wider text-[8.5px]">
+              <th className="p-1.5 border border-slate-300 text-center w-8">No</th>
+              <th className="p-1.5 border border-slate-300 text-left w-16">Hash</th>
+              <th className="p-1.5 border border-slate-300 text-left">Pesan Commit</th>
+              <th className="p-1.5 border border-slate-300 text-left w-36">Kontributor</th>
+              <th className="p-1.5 border border-slate-300 text-left w-28">Tanggal & Waktu</th>
+              <th className="p-1.5 border border-slate-300 text-right w-10">File</th>
+              <th className="p-1.5 border border-slate-300 text-right w-12">+Lines</th>
+              <th className="p-1.5 border border-slate-300 text-right w-12">-Lines</th>
+              <th className="p-1.5 border border-slate-300 text-right w-12">Total</th>
+              <th className="p-1.5 border border-slate-300 text-center w-20">Prediksi ML</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {sorted.map((commit, idx) => {
+              const conf = commit.classification?.confidence ? Math.round(commit.classification.confidence * 100) : 85;
+              const isYes = commit.classification?.label === 'YES';
+              return (
+                <tr key={commit.id} className={idx % 2 === 1 ? 'bg-slate-50' : 'bg-white'}>
+                  <td className="p-1.5 border border-slate-300 text-center text-slate-500 font-mono">
+                    {idx + 1}
+                  </td>
+                  <td className="p-1.5 border border-slate-300 font-mono text-[8.5px] font-bold text-slate-800">
+                    {commit.shortSha}
+                  </td>
+                  <td className="p-1.5 border border-slate-300 text-slate-900 leading-snug">
+                    {commit.message}
+                  </td>
+                  <td className="p-1.5 border border-slate-300 text-slate-800 whitespace-nowrap font-medium">
+                    {commit.contributorName.replace(' (Contoh)', '')}
+                  </td>
+                  <td className="p-1.5 border border-slate-300 font-mono text-[8px] text-slate-600 whitespace-nowrap">
+                    {formatDate(commit.timestamp)}
+                  </td>
+                  <td className="p-1.5 border border-slate-300 text-right font-mono text-slate-800">
+                    {commit.stats.filesChanged}
+                  </td>
+                  <td className="p-1.5 border border-slate-300 text-right font-mono text-emerald-700 font-semibold">
+                    +{commit.stats.additions}
+                  </td>
+                  <td className="p-1.5 border border-slate-300 text-right font-mono text-rose-700 font-semibold">
+                    -{commit.stats.deletions}
+                  </td>
+                  <td className="p-1.5 border border-slate-300 text-right font-mono text-slate-800 font-medium">
+                    {commit.stats.totalChanges}
+                  </td>
+                  <td className="p-1.5 border border-slate-300 text-center whitespace-nowrap">
+                    {isYes ? (
+                      <span className="px-1.5 py-0.5 text-[8.5px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 rounded">
+                        YES ({conf}%)
+                      </span>
+                    ) : (
+                      <span className="px-1.5 py-0.5 text-[8.5px] font-bold bg-rose-100 text-rose-800 border border-rose-300 rounded">
+                        NO ({conf}%)
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+
+        {/* Catatan Kaki Cetak */}
+        <div className="pt-4 border-t border-slate-300 flex justify-between items-start text-[9px] text-slate-500">
+          <div className="max-w-xl">
+            <p className="font-semibold text-slate-700">Catatan Etika Analisis Kontribusi PBL:</p>
+            <p className="mt-0.5 leading-relaxed">
+              Klasifikasi YES/NO merupakan indikasi pola perubahan histori commit Git berbasis Machine Learning untuk keperluan monitoring & pendampingan PBL, bukan nilai akademik final mahasiswa.
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="font-semibold text-slate-700">GitContrib PBL Analytics System</p>
+            <p className="mt-0.5">Dokumen Laporan Resmi Histori Commit</p>
+          </div>
+        </div>
       </div>
     </div>
   );

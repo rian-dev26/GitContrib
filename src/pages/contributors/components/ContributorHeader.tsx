@@ -43,13 +43,20 @@ export function ContributorHeader({
     <div className="space-y-4">
       {/* Navigation & Back Action */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-xs text-app-text-secondary">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-app-text-secondary">
           <Link
-            to={`/repositories/${repoId}`}
+            to="/contributors"
             className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-app-secondary/60 hover:bg-app-secondary border border-app-border text-app-text-primary transition-colors font-medium"
           >
             <ArrowLeft className="w-3.5 h-3.5 text-app-accent-primary" />
-            Kembali ke Hasil Analisis ({repoName})
+            Daftar Kontributor
+          </Link>
+          <span className="text-app-border">/</span>
+          <Link
+            to={`/repositories/${repoId}`}
+            className="hover:text-app-text-primary transition-colors"
+          >
+            {repoName}
           </Link>
           <span className="text-app-border">/</span>
           <span className="text-app-text-primary font-medium">{contributor.name}</span>

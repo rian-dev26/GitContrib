@@ -89,19 +89,18 @@ export function AppHeader() {
       ];
     }
 
-    // /contributors/:id — tampilkan nama contributor nyata dengan jalur repo
-    if (path.startsWith('/contributors')) {
+    // /contributors/:id — tampilkan nama contributor nyata dengan jalur Contributor
+    if (path.startsWith('/contributors') || path.startsWith('/contributor')) {
       const id = parts[1];
       const contribMap: Record<string, { name: string; repoId: string }> = {
         'contrib-01': { name: 'Dimas Pratama', repoId: 'repo-pbl-01' },
         'contrib-02': { name: 'Siti Aisyah', repoId: 'repo-pbl-01' },
         'contrib-03': { name: 'Rian Hidayat', repoId: 'repo-pbl-01' },
         'contrib-04': { name: 'Nurul Fadhilah', repoId: 'repo-pbl-01' },
-      };
-      const repoMap: Record<string, string> = {
-        'repo-pbl-01': 'smart-inventory-pbl',
-        'repo-pbl-02': 'attendance-mobile-app',
-        'repo-pbl-03': 'pbl-course-portal',
+        'contrib-05': { name: 'Ahmad Fauzi', repoId: 'repo-pbl-02' },
+        'contrib-06': { name: 'Dewi Lestari', repoId: 'repo-pbl-02' },
+        'contrib-07': { name: 'Budi Santoso', repoId: 'repo-pbl-03' },
+        'contrib-08': { name: 'Maya Indah', repoId: 'repo-pbl-03' },
       };
       if (!id || id === 'demo') {
         return [
@@ -110,11 +109,9 @@ export function AppHeader() {
         ];
       }
       const contrib = contribMap[id];
-      const repoId = contrib?.repoId ?? 'repo-pbl-01';
-      const repoName = repoMap[repoId] ?? repoId;
       return [
         { label: 'Dashboard', to: '/dashboard' },
-        { label: repoName, to: `/repositories/${repoId}` },
+        { label: 'Contributor', to: '/contributors' },
         { label: contrib?.name ?? id },
       ];
     }

@@ -141,28 +141,53 @@
 
 /* ─── Media Print Rules for Reports ────────────────────────────────────────── */
 @media print {
+  @page {
+    size: A4 landscape;
+    margin: 8mm 10mm;
+  }
+
   aside,
   header,
   nav,
   .no-print,
+  .print\:hidden,
   button {
     display: none !important;
   }
 
-  body, html, main {
+  body, html, #root, main, [class*="overflow-"], .h-screen {
     background-color: #ffffff !important;
+    background: #ffffff !important;
     color: #0f172a !important;
     overflow: visible !important;
     height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
   }
 
   #printable-report {
+    display: block !important;
     border: none !important;
     box-shadow: none !important;
     padding: 0 !important;
     margin: 0 !important;
+    width: 100% !important;
     max-width: 100% !important;
     background-color: #ffffff !important;
     color: #0f172a !important;
+  }
+
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 }

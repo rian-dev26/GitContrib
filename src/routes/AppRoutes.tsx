@@ -7,6 +7,7 @@ import { DashboardPage } from '../pages/dashboard/DashboardPage';
 import { AnalysisPage } from '../pages/analysis/AnalysisPage';
 import { RepositoryDetailPage } from '../pages/repository/RepositoryDetailPage';
 import { ContributorDetailPage } from '../pages/contributors/ContributorDetailPage';
+import { ContributorsListPage } from '../pages/contributors/ContributorsListPage';
 import { CommitDetailPage } from '../pages/commits/CommitDetailPage';
 import { CommitsListPage } from '../pages/commits/CommitsListPage';
 import { HistoryPage } from '../pages/history/HistoryPage';
@@ -50,8 +51,10 @@ export function AppRoutes() {
         <Route path="/repository/:repositoryId" element={<RepositoryDetailPage />} />
 
         {/* Contributors & alias */}
-        <Route path="/contributors" element={<Navigate to="/contributors/contrib-01" replace />} />
+        <Route path="/contributors" element={<ContributorsListPage />} />
         <Route path="/contributors/:contributorId" element={<ContributorDetailPage />} />
+        <Route path="/contributor" element={<Navigate to="/contributors" replace />} />
+        <Route path="/contributor/:contributorId" element={<ContributorDetailPage />} />
 
         {/* Commits */}
         <Route path="/commits" element={<CommitsListPage />} />
