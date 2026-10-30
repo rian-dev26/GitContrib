@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Github,
@@ -21,7 +21,7 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Badge } from '../../components/ui/Badge';
 import { validateGitHubRepoUrl } from '../../utils/githubUrl';
-import { repositoryService } from '../../services/repositoryService';
+import { repositoryService, AnalysisJobResponse } from '../../services/repositoryService';
 import { Repository } from '../../types';
 import { AnalysisProgressBar } from './components/AnalysisProgressBar';
 import { AnalysisStepIndicator, ANALYSIS_STAGES } from './components/AnalysisStepIndicator';
@@ -29,6 +29,17 @@ import { CommitStreamAnimation } from './components/CommitStreamAnimation';
 import { AiNodeNetworkAnimation } from './components/AiNodeNetworkAnimation';
 
 type AnalysisStatus = 'idle' | 'analyzing' | 'success' | 'error';
+
+/**
+ * Menghitung activeStep (1-5) berdasarkan progress job dari backend.
+ */
+function progressToStep(progress: number): number {
+  if (progress < 20) return 1; // Validasi & koneksi
+  if (progress < 40) return 2; // Git clone
+  if (progress < 65) return 3; // Ekstraksi fitur
+  if (progress < 85) return 4; // Inferensi ML
+  return 5; // Finalisasi
+}
 
 export function AnalysisPage() {
   const navigate = useNavigate();
@@ -44,12 +55,23 @@ export function AnalysisPage() {
   const [progress, setProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [analyzedRepo, setAnalyzedRepo] = useState<Repository | null>(null);
+  const [isBackendMode, setIsBackendMode] = useState(false);
 
-  // Progressive timer for the 5 distinct stages
+  // Ref untuk membatalkan polling jika user reset
+  const abortRef = useRef(false);
+
+  // Callback ketika backend mengirim update progress
+  const handleBackendProgress = useCallback((job: AnalysisJobResponse) => {
+    setProgress(job.progress);
+    setActiveStep(progressToStep(job.progress));
+  }, []);
+
+  // Fallback: timer-based progress untuk mode demo (ketika backend tidak aktif)
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
 
-    if (status === 'analyzing') {
+    // Hanya jalankan timer simulasi jika BUKAN mode backend
+    if (status === 'analyzing' && !isBackendMode) {
       if (activeStep === 1) {
         setProgress(20);
         timeoutId = setTimeout(() => {
@@ -72,6 +94,7 @@ export function AnalysisPage() {
         }, 1200);
       } else if (activeStep === 5) {
         setProgress(100);
+        // Di mode demo, panggil registerRepository langsung (fallback ke mock)
         timeoutId = setTimeout(async () => {
           try {
             const validation = validateGitHubRepoUrl(repoUrl);
@@ -94,13 +117,14 @@ export function AnalysisPage() {
     }
 
     return () => clearTimeout(timeoutId);
-  }, [status, activeStep, repoUrl, branch]);
+  }, [status, activeStep, repoUrl, branch, isBackendMode]);
 
   // Handler Submit Form
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setValidationError(null);
     setErrorMessage(null);
+    abortRef.current = false;
 
     // 1. Validasi format URL di Frontend
     const validation = validateGitHubRepoUrl(repoUrl);
@@ -109,7 +133,7 @@ export function AnalysisPage() {
       return;
     }
 
-    // Periksa skenario error simulasi sejak awal (jika mengandung kata kunci simulasi)
+    // Periksa skenario error simulasi (untuk preset demo)
     const lowerUrl = repoUrl.toLowerCase();
     if (lowerUrl.includes('private') || lowerUrl.includes('secret')) {
       setStatus('analyzing');
@@ -150,19 +174,54 @@ export function AnalysisPage() {
       return;
     }
 
-    // 2. Mulai State Loading & 5 Tahapan Simulasi
+    // 2. Mulai analisis — coba backend dulu, fallback ke demo
     setStatus('analyzing');
     setActiveStep(1);
     setProgress(10);
+
+    // Coba hubungkan ke backend
+    try {
+      const cleanUrl = validation.cleanUrl || repoUrl;
+      setIsBackendMode(true);
+
+      const result = await repositoryService.registerRepository(
+        cleanUrl,
+        branch,
+        handleBackendProgress
+      );
+
+      if (!abortRef.current) {
+        setProgress(100);
+        setActiveStep(5);
+        setAnalyzedRepo(result);
+        setStatus('success');
+      }
+    } catch (err) {
+      if (abortRef.current) return;
+
+      // Cek apakah error dari backend atau koneksi gagal
+      const errorMsg = err instanceof Error ? err.message : String(err);
+
+      if (errorMsg.includes('mode demo') || errorMsg.includes('Backend tidak tersedia')) {
+        // Fallback ke mode demo — biarkan useEffect timer berjalan
+        setIsBackendMode(false);
+        // Timer di useEffect akan mengambil alih
+      } else {
+        setStatus('error');
+        setErrorMessage(errorMsg);
+      }
+    }
   };
 
   // Reset form untuk analisis baru
   const handleReset = () => {
+    abortRef.current = true;
     setStatus('idle');
     setErrorMessage(null);
     setValidationError(null);
     setActiveStep(1);
     setProgress(0);
+    setIsBackendMode(false);
   };
 
   const currentStage = ANALYSIS_STAGES.find((s) => s.id === activeStep) || ANALYSIS_STAGES[0];
@@ -248,13 +307,24 @@ export function AnalysisPage() {
                 <button
                   type="button"
                   onClick={() => {
+                    setRepoUrl('https://github.com/octocat/Hello-World');
+                    setBranch('master');
+                    setValidationError(null);
+                  }}
+                  className="px-2.5 py-1 rounded bg-app-accent-positive/10 border border-app-accent-positive/30 text-app-accent-positive hover:border-app-accent-positive text-[11px] transition-colors font-medium"
+                >
+                  ⚡ Live Repo Nyata (octocat/Hello-World)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
                     setRepoUrl('https://github.com/if-polibatam/smart-inventory-pbl');
                     setBranch('main');
                     setValidationError(null);
                   }}
                   className="px-2.5 py-1 rounded bg-app-secondary border border-app-border text-app-text-primary hover:border-app-accent-primary text-[11px] transition-colors"
                 >
-                  ✓ Repo Valid (smart-inventory-pbl)
+                  ✓ Demo PBL (smart-inventory-pbl)
                 </button>
                 <button
                   type="button"
@@ -298,6 +368,16 @@ export function AnalysisPage() {
       {/* STATE 2: ANALYZING (State Loading, Stepper, Live Stream & AI Node) */}
       {status === 'analyzing' && (
         <div className="space-y-5 animate-fadeIn">
+          {/* Mode Indicator */}
+          <div className="flex items-center gap-2 text-xs text-app-text-secondary">
+            <div className={`w-2 h-2 rounded-full ${isBackendMode ? 'bg-app-accent-positive animate-pulse' : 'bg-app-accent-secondary'}`} />
+            <span>
+              {isBackendMode
+                ? 'Terhubung ke Backend ML — analisis real-time'
+                : 'Mode Demo — simulasi tahapan analisis'}
+            </span>
+          </div>
+
           {/* Progress Bar Visual */}
           <AnalysisProgressBar
             progress={progress}
@@ -360,6 +440,7 @@ export function AnalysisPage() {
                 <li>Periksa ejaan URL repository (contoh yang valid: <code>https://github.com/owner/repository</code>).</li>
                 <li>Pastikan target branch (misal: <code>main</code> atau <code>master</code>) benar-benar ada pada repository.</li>
                 <li>Jika repository privat, ubah visibility menjadi publik sementara di GitHub Settings.</li>
+                <li>Pastikan backend GitContrib API sedang berjalan (<code>python main.py</code> di folder backend).</li>
               </ul>
             </div>
 
@@ -388,7 +469,9 @@ export function AnalysisPage() {
                   Analisis Repository Selesai!
                 </CardTitle>
                 <CardDescription>
-                  Simulasi ekstraksi histori Git dan inferensi model Machine Learning telah selesai disintesis.
+                  {analyzedRepo.analysisJobId
+                    ? 'Ekstraksi histori Git dan inferensi model Machine Learning telah selesai diproses oleh backend.'
+                    : 'Simulasi ekstraksi histori Git dan inferensi model Machine Learning telah selesai disintesis.'}
                 </CardDescription>
               </div>
             </div>
@@ -398,6 +481,14 @@ export function AnalysisPage() {
           </CardHeader>
 
           <CardContent className="space-y-4">
+            {/* Mode Indicator di Success */}
+            {analyzedRepo.analysisJobId && (
+              <div className="flex items-center gap-2 text-xs text-app-accent-positive">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Hasil dari model ML backend (bukan data simulasi)</span>
+              </div>
+            )}
+
             {/* Repository Summary Box */}
             <div className="p-4 rounded-md bg-app-card border border-app-border space-y-3">
               <div className="flex items-center justify-between flex-wrap gap-2">
@@ -424,19 +515,21 @@ export function AnalysisPage() {
                 <div>
                   <span className="text-[11px] text-app-text-secondary block">Total Commit</span>
                   <span className="font-mono font-semibold text-app-text-primary">
-                    {analyzedRepo.stats?.totalCommits ?? 84} commits
+                    {analyzedRepo.stats?.totalCommits ?? '—'} commits
                   </span>
                 </div>
                 <div>
                   <span className="text-[11px] text-app-text-secondary block">Kontributor Mahasiswa</span>
                   <span className="font-mono font-semibold text-app-text-primary">
-                    {analyzedRepo.stats?.totalContributors ?? 4} mahasiswa
+                    {analyzedRepo.stats?.totalContributors ?? '—'} mahasiswa
                   </span>
                 </div>
                 <div>
                   <span className="text-[11px] text-app-text-secondary block">Estimasi Pola ML</span>
                   <span className="font-mono font-semibold text-app-accent-positive">
-                    78% YES / 22% NO
+                    {analyzedRepo.mlResults
+                      ? `${analyzedRepo.mlResults.yesRatio}% YES / ${analyzedRepo.mlResults.noRatio}% NO`
+                      : `${analyzedRepo.stats?.totalCommits ? '—' : '78'}% YES / ${analyzedRepo.stats?.totalCommits ? '—' : '22'}% NO`}
                   </span>
                 </div>
               </div>
@@ -476,7 +569,7 @@ export function AnalysisPage() {
               </p>
               <ul className="text-app-text-secondary list-disc list-inside space-y-0.5">
                 <li>Repository GitHub berstatus <strong>Publik</strong></li>
-                <li>Ekstraksi riwayat Git log & metadata commit</li>
+                <li>Ekstraksi riwayat Git log &amp; metadata commit</li>
                 <li>Klasifikasi pola kontribusi tingkat commit (YES/NO)</li>
                 <li>Agregasi ringkasan pada tingkat kontributor mahasiswa</li>
               </ul>

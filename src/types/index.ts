@@ -83,6 +83,20 @@ export interface Repository {
     totalContributors: number;
     branchesCount: number;
   };
+  /** ID job analisis dari backend (jika dianalisis via API) */
+  analysisJobId?: string;
+  /** Hasil klasifikasi ML dari backend */
+  mlResults?: {
+    yesRatio: number;
+    noRatio: number;
+    contributors: Array<{
+      author_id: string;
+      name: string;
+      cluster: number;
+      commits: number;
+    }>;
+    commitTypes: string[];
+  };
 }
 
 export interface ContributorSummary {

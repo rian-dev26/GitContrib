@@ -1,13 +1,16 @@
-"""Main extraction pipeline: load commits, merge identities, save to parquet."""
+"""Main extraction pipeline: load commits, merge identities, save to parquet/csv."""
 
 import pandas as pd
 from pathlib import Path
 from typing import Optional
+import logging
 
 from .git_reader import load_raw_commits, get_file_stats
 from .identity import fetch_github_usernames
 from .merge import merge_identities, save_identity_mapping
 from .classify import classify_file, is_bot_author
+
+logger = logging.getLogger(__name__)
 
 
 def extract_repository(
@@ -18,7 +21,7 @@ def extract_repository(
     github_token: Optional[str] = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
     """
-    Extract commits and files from repo. Save to parquet.
+    Extract commits and files from repo.
     
     Returns:
         - commits_df: DataFrame with columns [sha, author_id, author_name, author_email, ...]
@@ -59,18 +62,38 @@ def extract_repository(
     author_map = {c["sha"]: c["author_id"] for c in processed_commits}
     files_df["author_id"] = files_df["sha"].map(author_map)
     
-    # Save to parquet
+    # Save cache / export files (parquet if pyarrow is installed, otherwise fallback to CSV)
     commits_path = output_dir / f"{repo_name}_commits.parquet"
     files_path = output_dir / f"{repo_name}_files.parquet"
     identity_path = output_dir / f"{repo_name}_identity_map.json"
     
-    commits_df.to_parquet(commits_path, index=False, engine="pyarrow")
-    files_df.to_parquet(files_path, index=False, engine="pyarrow")
-    save_identity_mapping(identity_map, identity_path)
+    has_pyarrow = False
+    try:
+        import pyarrow  # noqa: F401
+        has_pyarrow = True
+    except Exception:
+        has_pyarrow = False
+
+    if has_pyarrow:
+        try:
+            commits_df.to_parquet(commits_path, index=False)
+            files_df.to_parquet(files_path, index=False)
+            print(f"\n✓ Extraction cache saved (parquet): {commits_path}")
+        except Exception as e:
+            logger.info(f"Parquet export failed: {e}")
+    else:
+        try:
+            commits_csv = output_dir / f"{repo_name}_commits.csv"
+            files_csv = output_dir / f"{repo_name}_files.csv"
+            commits_df.to_csv(commits_csv, index=False)
+            files_df.to_csv(files_csv, index=False)
+            print(f"\n✓ Extraction cache saved (CSV fallback): {commits_csv}")
+        except Exception as csv_err:
+            logger.debug(f"Disk cache skipped: {csv_err}")
     
-    print(f"\n✓ Extraction complete:")
-    print(f"  Commits: {commits_path}")
-    print(f"  Files:   {files_path}")
-    print(f"  Identity: {identity_path}")
+    try:
+        save_identity_mapping(identity_map, identity_path)
+    except Exception as id_err:
+        logger.debug(f"Identity map save skipped: {id_err}")
     
     return commits_df, files_df, identity_map

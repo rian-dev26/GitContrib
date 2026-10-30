@@ -103,7 +103,10 @@ def train_clustering_model(
     
     joblib.dump(scaler, scaler_path)
     joblib.dump(kmeans, model_path)
-    features_df.to_parquet(features_path, index=False, engine="pyarrow")
+    try:
+        features_df.to_parquet(features_path, index=False)
+    except Exception:
+        features_df.to_csv(output_dir / "contributor_features_with_clusters.csv", index=False)
     
     # Save metadata
     metadata = {
