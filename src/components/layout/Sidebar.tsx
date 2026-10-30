@@ -6,7 +6,6 @@ import {
   History,
   Users,
   GitCommitHorizontal,
-  FileBarChart,
   ChevronLeft,
   ChevronRight,
   X,
@@ -50,11 +49,7 @@ const navItems: NavItem[] = [
     to: '/commits',
     icon: GitCommitHorizontal,
   },
-  {
-    label: 'Laporan',
-    to: '/reports',
-    icon: FileBarChart,
-  },
+
   {
     label: 'Pengaturan',
     to: '/settings',

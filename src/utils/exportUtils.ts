@@ -1,4 +1,5 @@
-import { Commit, Repository } from '../../../types';
+import { Commit, Repository } from '../types';
+
 
 /**
  * Utility untuk membuat dan mengunduh file CSV dari data commit

@@ -10,7 +10,6 @@ import { ContributorDetailPage } from '../pages/contributors/ContributorDetailPa
 import { CommitDetailPage } from '../pages/commits/CommitDetailPage';
 import { CommitsListPage } from '../pages/commits/CommitsListPage';
 import { HistoryPage } from '../pages/history/HistoryPage';
-import { ReportsPage } from '../pages/reports/ReportsPage';
 import { SettingsPage } from '../pages/settings/SettingsPage';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { NotFoundPage } from '../pages/not-found/NotFoundPage';
@@ -59,7 +58,6 @@ export function AppRoutes() {
         <Route path="/commits/:commitId" element={<CommitDetailPage />} />
 
         <Route path="/history" element={<HistoryPage />} />
-        <Route path="/reports" element={<ReportsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
