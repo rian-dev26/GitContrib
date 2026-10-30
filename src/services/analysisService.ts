@@ -12,6 +12,17 @@ import {
 } from '../mocks';
 
 /**
+ * Cek apakah data adalah dummy (belum ada analisis real dari backend)
+ * Return true hanya jika SEMUA data punya "(Contoh)" - berarti belum ada analisis real
+ */
+const isDummyData = (): boolean => {
+  if (MOCK_CONTRIBUTORS.length === 0) return true;
+  // Dummy jika semua contributor punya "(Contoh)"
+  const allDummy = MOCK_CONTRIBUTORS.every(c => c.name.includes('(Contoh)'));
+  return allDummy;
+};
+
+/**
  * Analysis Service
  * Mengelola hasil analisis pola kontribusi Machine Learning (YES/NO) untuk Dosen.
  */
@@ -34,9 +45,11 @@ export const analysisService = {
 
   /**
    * Mengambil daftar contributor beserta ringkasan metrik commit
+   * Return empty jika masih dummy data
    */
   async getContributors(repositoryId?: string): Promise<Contributor[]> {
     await new Promise((resolve) => setTimeout(resolve, 200));
+    if (isDummyData()) return [];
     if (!repositoryId || repositoryId === 'all' || repositoryId === 'ALL') {
       return [...MOCK_CONTRIBUTORS];
     }
@@ -54,9 +67,11 @@ export const analysisService = {
 
   /**
    * Mengambil daftar commit dengan hasil klasifikasi YES/NO
+   * Return empty jika masih dummy data
    */
   async getCommits(repositoryId?: string, contributorId?: string): Promise<Commit[]> {
     await new Promise((resolve) => setTimeout(resolve, 200));
+    if (isDummyData()) return [];
     let list = [...MOCK_COMMITS];
     if (repositoryId) {
       list = list.filter((c) => c.repositoryId === repositoryId);
@@ -78,9 +93,10 @@ export const analysisService = {
 
   /**
    * Mengambil riwayat aktivitas analisis yang pernah dijalankan
+   * Return empty jika masih dummy data
    */
   async getHistory(): Promise<AnalysisHistoryItem[]> {
     await new Promise((resolve) => setTimeout(resolve, 200));
-    return [...MOCK_ANALYSIS_HISTORY];
+    return isDummyData() ? [] : [...MOCK_ANALYSIS_HISTORY];
   },
 };

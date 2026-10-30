@@ -227,9 +227,10 @@ export const repositoryService = {
     MOCK_REPOSITORIES.unshift(newRepo);
 
     // Tambahkan kontributor dari hasil backend
-    analysisResult.contributors.forEach((c) => {
+    analysisResult.contributors.forEach((c, idx) => {
+      const shortId = `contrib-${idx + 1}`;
       MOCK_CONTRIBUTORS.unshift({
-        id: `contrib-${repoId}-${c.author_id}`,
+        id: shortId,
         name: c.name || c.author_id,
         username: c.author_id,
         email: `${c.author_id}@example.com`,
@@ -248,14 +249,20 @@ export const repositoryService = {
     });
 
     // Tambahkan commits dari hasil backend
+    const authorIdMap = new Map<string, string>();
+    analysisResult.contributors.forEach((c, idx) => {
+      authorIdMap.set(c.author_id, `contrib-${idx + 1}`);
+    });
+
     analysisResult.commits.forEach((cm, idx) => {
       const type = (cm.type || '').toLowerCase();
       const isYes = ['feat', 'fix', 'refactor', 'test', 'perf'].includes(type) || (type !== 'chore' && type !== 'style' && type !== 'docs');
+      const authorId = authorIdMap.get(cm.author) || `contrib-0`;
       MOCK_COMMITS.unshift({
         id: cm.sha || `sha-${idx}`,
         shortSha: (cm.sha || `sha${idx}`).slice(0, 7),
         repositoryId: repoId,
-        contributorId: `contrib-${repoId}-${cm.author}`,
+        contributorId: authorId,
         contributorName: cm.author || 'Contributor',
         contributorEmail: `${cm.author || 'contributor'}@example.com`,
         message: cm.message || `${cm.type || 'commit'}: update repository code`,

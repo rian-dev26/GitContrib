@@ -6,6 +6,7 @@ import {
   Play,
   CheckCircle2,
   AlertCircle,
+  AlertTriangle,
   FolderGit2,
   ArrowRight,
   RotateCcw,
@@ -56,6 +57,7 @@ export function AnalysisPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [analyzedRepo, setAnalyzedRepo] = useState<Repository | null>(null);
   const [isBackendMode, setIsBackendMode] = useState(false);
+  const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
 
   // Ref untuk membatalkan polling jika user reset
   const abortRef = useRef(false);
@@ -124,6 +126,7 @@ export function AnalysisPage() {
     e.preventDefault();
     setValidationError(null);
     setErrorMessage(null);
+    setDuplicateWarning(null);
     abortRef.current = false;
 
     // 1. Validasi format URL di Frontend
@@ -131,6 +134,27 @@ export function AnalysisPage() {
     if (!validation.isValid) {
       setValidationError(validation.error || 'URL repository GitHub tidak valid.');
       return;
+    }
+
+    // 1.5. Cek duplicate repository
+    try {
+      const existingRepos = await repositoryService.getRepositories();
+      const normalizeUrl = (url: string) => 
+        url.toLowerCase().replace(/\/$/, '').replace(/\.git$/, '');
+      const cleanInputUrl = normalizeUrl(repoUrl);
+      
+      const duplicate = existingRepos.find(
+        repo => normalizeUrl(repo.url) === cleanInputUrl
+      );
+      
+      if (duplicate) {
+        setDuplicateWarning(
+          `Repository "${duplicate.name}" sudah pernah dianalisis pada ${new Date(duplicate.lastAnalyzedAt || '').toLocaleString('id-ID')}. Analisis ulang akan menimpa data sebelumnya. Lanjutkan?`
+        );
+        return;
+      }
+    } catch (err) {
+      console.error('Gagal cek duplicate:', err);
     }
 
     // Periksa skenario error simulasi (untuk preset demo)
@@ -219,9 +243,48 @@ export function AnalysisPage() {
     setStatus('idle');
     setErrorMessage(null);
     setValidationError(null);
+    setDuplicateWarning(null);
     setActiveStep(1);
     setProgress(0);
     setIsBackendMode(false);
+  };
+
+  // Confirm duplicate dan lanjutkan analisis
+  const handleConfirmDuplicate = async () => {
+    setDuplicateWarning(null);
+    setStatus('analyzing');
+    setActiveStep(1);
+    setProgress(10);
+
+    // Lanjutkan analisis dengan flow normal
+    try {
+      const validation = validateGitHubRepoUrl(repoUrl);
+      const cleanUrl = validation.cleanUrl || repoUrl;
+      setIsBackendMode(true);
+
+      const result = await repositoryService.registerRepository(
+        cleanUrl,
+        branch,
+        handleBackendProgress
+      );
+
+      if (!abortRef.current) {
+        setProgress(100);
+        setActiveStep(5);
+        setAnalyzedRepo(result);
+        setStatus('success');
+      }
+    } catch (err) {
+      if (abortRef.current) return;
+      const errorMsg = err instanceof Error ? err.message : String(err);
+
+      if (errorMsg.includes('mode demo') || errorMsg.includes('Backend tidak tersedia')) {
+        setIsBackendMode(false);
+      } else {
+        setStatus('error');
+        setErrorMessage(errorMsg);
+      }
+    }
   };
 
   const currentStage = ANALYSIS_STAGES.find((s) => s.id === activeStep) || ANALYSIS_STAGES[0];
@@ -234,6 +297,37 @@ export function AnalysisPage() {
       />
 
       <EthicalNoticeCard />
+
+      {/* Duplicate Warning Card */}
+      {duplicateWarning && (
+        <Card className="border-app-accent-secondary/50 bg-app-accent-secondary/5">
+          <CardContent className="pt-6 space-y-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-app-accent-secondary shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-semibold text-app-text-primary">Repository Sudah Dianalisis</h3>
+                <p className="text-sm text-app-text-secondary mt-1">{duplicateWarning}</p>
+              </div>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setDuplicateWarning(null)}
+              >
+                Batal
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleConfirmDuplicate}
+              >
+                Lanjutkan Analisis Ulang
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* STATE 1: IDLE (Form Input & Validasi) */}
       {status === 'idle' && (

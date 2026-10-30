@@ -1,13 +1,17 @@
 """Database connection and session management."""
 
+from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 import os
 
-# Database URL (SQLite for demo, PostgreSQL for production)
+# Resolve absolute path to gitcontrib.db
+DEFAULT_DB_FILE = (Path(__file__).resolve().parent.parent / "gitcontrib.db").resolve()
+
+# Database URL (SQLite default with absolute path, can be overridden via DATABASE_URL)
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "sqlite:///./gitcontrib.db"
+    f"sqlite:///{DEFAULT_DB_FILE.as_posix()}"
 )
 
 engine = create_engine(
