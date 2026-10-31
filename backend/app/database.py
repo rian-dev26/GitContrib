@@ -5,18 +5,18 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 import os
 
-# Resolve absolute path to gitcontrib.db
+# Resolve absolute path to gitcontrib.db (kept for backward compat, not used)
 DEFAULT_DB_FILE = (Path(__file__).resolve().parent.parent / "gitcontrib.db").resolve()
 
-# Database URL (SQLite default with absolute path, can be overridden via DATABASE_URL)
+# Database URL (PostgreSQL default, can be overridden via DATABASE_URL)
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    f"sqlite:///{DEFAULT_DB_FILE.as_posix()}"
+    "postgresql://postgres:password@localhost:5432/gitcontrib"
 )
 
 engine = create_engine(
     DATABASE_URL,
-    connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {},
+    connect_args={} if "postgresql" in DATABASE_URL else {"check_same_thread": False},
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
