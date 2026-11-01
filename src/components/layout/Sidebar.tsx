@@ -16,6 +16,7 @@ import { useLayout } from '../../contexts/LayoutContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { cn } from '../../utils/cn';
+import gitContribLogo from '../../assets/Git Contrib Logo.png';
 
 interface NavItem {
   label: string;
@@ -99,9 +100,7 @@ export function Sidebar() {
         >
           <div className="flex items-center gap-3 min-w-0">
             {/* Logo sederhana berbasis Git branch */}
-            <div className="w-9 h-9 rounded-md bg-app-accent-primary/15 border border-app-accent-primary/30 flex items-center justify-center text-app-accent-primary shrink-0 shadow-sm">
-              <GitBranch className="w-5 h-5 stroke-[2.2]" />
-            </div>
+            <img src={gitContribLogo} alt="GitContrib" className="w-9 h-9 object-contain shrink-0" />
 
             {(!isCollapsed || isMobileOpen) && (
               <div className="min-w-0">
