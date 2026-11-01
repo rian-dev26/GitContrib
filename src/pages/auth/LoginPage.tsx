@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { cn } from '../../utils/cn';
+import gitContribLogo from '../../assets/Git Contrib Logo.png';
 
 // ─── Validation ───────────────────────────────────────────────────────────────
 
@@ -83,9 +84,7 @@ export function LoginPage() {
         
         {/* Brand & Institution Header */}
         <div className="flex flex-col items-center text-center mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-500/25 border border-indigo-400/40 flex items-center justify-center text-indigo-300 shadow-md mb-3 backdrop-blur-sm">
-            <GitBranch className="w-6 h-6 stroke-[2.3]" />
-          </div>
+          <img src={gitContribLogo} alt="GitContrib" className="w-16 h-16 object-contain mb-3 drop-shadow-md" />
           <h1 className="text-xl font-extrabold tracking-wider text-white uppercase drop-shadow-sm">
             GitContrib
           </h1>
