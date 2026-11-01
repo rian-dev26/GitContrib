@@ -1,7 +1,8 @@
 """API routes."""
 
-from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends, Query
 from sqlalchemy.orm import Session
+from typing import Optional, List
 import uuid
 from pathlib import Path
 import tempfile
@@ -42,9 +43,10 @@ async def analyze(
 @router.get("/jobs/{job_id}", response_model=AnalysisJobResponse)
 async def status(job_id: str, db: Session = Depends(get_db)):
     """Get job status."""
-    job = db.query(AnalysisJob).filter(AnalysisJob.job_id == job_id).first()
+    clean_id = job_id.replace("job-", "")
+    job = db.query(AnalysisJob).filter(AnalysisJob.job_id == clean_id).first()
     if not job:
-        raise HTTPException(status_code=404)
+        raise HTTPException(status_code=404, detail="Job not found")
     return AnalysisJobResponse(
         job_id=job.job_id, repo_url=job.repo_url, repo_name=job.repo_name,
         status=job.status, progress=job.progress, error_message=job.error_message,
@@ -55,9 +57,13 @@ async def status(job_id: str, db: Session = Depends(get_db)):
 @router.get("/results/{job_id}")
 async def results(job_id: str, db: Session = Depends(get_db)):
     """Get analysis result."""
-    res = db.query(AnalysisResult).filter(AnalysisResult.job_id == job_id).first()
+    clean_id = job_id.replace("job-", "")
+    res = db.query(AnalysisResult).filter(
+        (AnalysisResult.job_id == clean_id) | 
+        (AnalysisResult.result_id == clean_id)
+    ).first()
     if not res:
-        raise HTTPException(status_code=404)
+        raise HTTPException(status_code=404, detail="Result not found")
     
     contribs = db.query(Contributor).filter(Contributor.result_id == res.result_id).all()
     commits = db.query(Commit).filter(Commit.result_id == res.result_id).all()
@@ -70,8 +76,8 @@ async def results(job_id: str, db: Session = Depends(get_db)):
             "name": c.name,
             "cluster": c.cluster,
             "commits": c.total_commits,
-            "lines_added": c.lines_added,
-            "lines_deleted": c.lines_deleted,
+            "lines_added": c.lines_added or 0,
+            "lines_deleted": c.lines_deleted or 0,
         } for c in contribs],
         "commits": [{
             "sha": c.sha,
@@ -82,6 +88,139 @@ async def results(job_id: str, db: Session = Depends(get_db)):
             "lines_deleted": c.lines_deleted or 0,
         } for c in commits],
     }
+
+
+@router.get("/repositories")
+async def list_repositories(db: Session = Depends(get_db)):
+    """List all analyzed repositories from database."""
+    results = db.query(AnalysisResult).order_by(AnalysisResult.created_at.desc()).all()
+    repos = []
+    seen = set()
+    for r in results:
+        if r.repo_name in seen:
+            continue
+        seen.add(r.repo_name)
+        job = db.query(AnalysisJob).filter(AnalysisJob.job_id == r.job_id).first()
+        repos.append({
+            "id": f"job-{r.job_id}",
+            "name": r.repo_name,
+            "fullName": f"repo/{r.repo_name}",
+            "url": job.repo_url if job else f"https://github.com/{r.repo_name}",
+            "defaultBranch": "main",
+            "isPrivate": False,
+            "createdAt": r.created_at.isoformat() if r.created_at else datetime.utcnow().isoformat(),
+            "lastAnalyzedAt": r.created_at.isoformat() if r.created_at else datetime.utcnow().isoformat(),
+            "stats": {
+                "totalCommits": r.n_commits or 0,
+                "totalContributors": r.n_contributors or 0,
+                "branchesCount": 1,
+            }
+        })
+    return repos
+
+
+@router.get("/repositories/{repo_id}")
+async def get_repository_detail(repo_id: str, db: Session = Depends(get_db)):
+    """Get single repository with full contributors and commits."""
+    clean_id = repo_id.replace("job-", "")
+    res = db.query(AnalysisResult).filter(
+        (AnalysisResult.job_id == clean_id) | 
+        (AnalysisResult.result_id == clean_id) | 
+        (AnalysisResult.repo_name == repo_id)
+    ).order_by(AnalysisResult.created_at.desc()).first()
+    
+    if not res:
+        res = db.query(AnalysisResult).order_by(AnalysisResult.created_at.desc()).first()
+        if not res:
+            raise HTTPException(status_code=404, detail="Repository not found")
+    
+    job = db.query(AnalysisJob).filter(AnalysisJob.job_id == res.job_id).first()
+    contribs = db.query(Contributor).filter(Contributor.result_id == res.result_id).all()
+    commits = db.query(Commit).filter(Commit.result_id == res.result_id).all()
+    
+    return {
+        "id": f"job-{res.job_id}",
+        "name": res.repo_name,
+        "fullName": f"repo/{res.repo_name}",
+        "url": job.repo_url if job else f"https://github.com/{res.repo_name}",
+        "defaultBranch": "main",
+        "createdAt": res.created_at.isoformat() if res.created_at else datetime.utcnow().isoformat(),
+        "lastAnalyzedAt": res.created_at.isoformat() if res.created_at else datetime.utcnow().isoformat(),
+        "stats": {
+            "totalCommits": res.n_commits or len(commits),
+            "totalContributors": res.n_contributors or len(contribs),
+            "branchesCount": 1,
+        },
+        "contributors": [{
+            "author_id": c.author_id,
+            "name": c.name,
+            "cluster": c.cluster,
+            "commits": c.total_commits,
+            "lines_added": c.lines_added or 0,
+            "lines_deleted": c.lines_deleted or 0,
+        } for c in contribs],
+        "commits": [{
+            "sha": c.sha,
+            "message": c.message_subject or "",
+            "type": c.predicted_type,
+            "author": c.author_name,
+            "lines_added": c.lines_added or 0,
+            "lines_deleted": c.lines_deleted or 0,
+        } for c in commits],
+    }
+
+
+@router.get("/contributors")
+async def list_contributors(repositoryId: Optional[str] = Query(None), db: Session = Depends(get_db)):
+    """List contributors, optionally filtered by repositoryId (job-UUID or result_id)."""
+    clean_id = (repositoryId or "").replace("job-", "")
+    
+    query = db.query(Contributor)
+    if clean_id:
+        res = db.query(AnalysisResult).filter(
+            (AnalysisResult.job_id == clean_id) | 
+            (AnalysisResult.result_id == clean_id) |
+            (AnalysisResult.repo_name == clean_id)
+        ).first()
+        if res:
+            query = query.filter(Contributor.result_id == res.result_id)
+            
+    contribs = query.all()
+    return [{
+        "id": c.contributor_id,
+        "author_id": c.author_id,
+        "name": c.name or c.author_id,
+        "cluster": c.cluster,
+        "commits": c.total_commits,
+        "lines_added": c.lines_added or 0,
+        "lines_deleted": c.lines_deleted or 0,
+    } for c in contribs]
+
+
+@router.get("/commits")
+async def list_commits(repositoryId: Optional[str] = Query(None), db: Session = Depends(get_db)):
+    """List commits, optionally filtered by repositoryId."""
+    clean_id = (repositoryId or "").replace("job-", "")
+    
+    query = db.query(Commit)
+    if clean_id:
+        res = db.query(AnalysisResult).filter(
+            (AnalysisResult.job_id == clean_id) | 
+            (AnalysisResult.result_id == clean_id) |
+            (AnalysisResult.repo_name == clean_id)
+        ).first()
+        if res:
+            query = query.filter(Commit.result_id == res.result_id)
+            
+    commits = query.order_by(Commit.created_at.desc()).limit(200).all()
+    return [{
+        "sha": c.sha,
+        "message": c.message_subject or "",
+        "type": c.predicted_type,
+        "author": c.author_name,
+        "lines_added": c.lines_added or 0,
+        "lines_deleted": c.lines_deleted or 0,
+    } for c in commits]
 
 
 def _analyze_bg(job_id: str, url: str, limit: int):

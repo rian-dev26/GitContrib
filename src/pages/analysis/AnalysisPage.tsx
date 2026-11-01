@@ -58,6 +58,7 @@ export function AnalysisPage() {
   const [analyzedRepo, setAnalyzedRepo] = useState<Repository | null>(null);
   const [isBackendMode, setIsBackendMode] = useState(false);
   const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
+  const [duplicateRepo, setDuplicateRepo] = useState<Repository | null>(null);
 
   // Ref untuk membatalkan polling jika user reset
   const abortRef = useRef(false);
@@ -127,6 +128,7 @@ export function AnalysisPage() {
     setValidationError(null);
     setErrorMessage(null);
     setDuplicateWarning(null);
+    setDuplicateRepo(null);
     abortRef.current = false;
 
     // 1. Validasi format URL di Frontend
@@ -148,8 +150,9 @@ export function AnalysisPage() {
       );
       
       if (duplicate) {
+        setDuplicateRepo(duplicate);
         setDuplicateWarning(
-          `Repository "${duplicate.name}" sudah pernah dianalisis pada ${new Date(duplicate.lastAnalyzedAt || '').toLocaleString('id-ID')}. Analisis ulang akan menimpa data sebelumnya. Lanjutkan?`
+          `Repository "${duplicate.name}" sudah pernah dianalisis pada ${new Date(duplicate.lastAnalyzedAt || '').toLocaleString('id-ID')}. Anda dapat langsung membuka hasil analisis yang sudah ada atau menjalankan analisis ulang.`
         );
         return;
       }
@@ -244,6 +247,7 @@ export function AnalysisPage() {
     setErrorMessage(null);
     setValidationError(null);
     setDuplicateWarning(null);
+    setDuplicateRepo(null);
     setActiveStep(1);
     setProgress(0);
     setIsBackendMode(false);
@@ -252,6 +256,7 @@ export function AnalysisPage() {
   // Confirm duplicate dan lanjutkan analisis
   const handleConfirmDuplicate = async () => {
     setDuplicateWarning(null);
+    setDuplicateRepo(null);
     setStatus('analyzing');
     setActiveStep(1);
     setProgress(10);
@@ -309,21 +314,34 @@ export function AnalysisPage() {
                 <p className="text-sm text-app-text-secondary mt-1">{duplicateWarning}</p>
               </div>
             </div>
-            <div className="flex gap-2 justify-end">
+            <div className="flex flex-wrap gap-2 justify-end">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setDuplicateWarning(null)}
+                onClick={() => {
+                  setDuplicateWarning(null);
+                  setDuplicateRepo(null);
+                }}
               >
                 Batal
               </Button>
               <Button
-                variant="primary"
+                variant="secondary"
                 size="sm"
                 onClick={handleConfirmDuplicate}
               >
-                Lanjutkan Analisis Ulang
+                Analisis Ulang
               </Button>
+              {duplicateRepo && (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => navigate(`/repositories/${duplicateRepo.id}`)}
+                  rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
+                >
+                  Buka Hasil Analisis
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
